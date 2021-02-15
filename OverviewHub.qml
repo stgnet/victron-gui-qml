@@ -1,8 +1,12 @@
 import QtQuick 1.1
+import com.victron.velib 1.0
 import "utils.js" as Utils
 
 OverviewPage {
 	id: root
+
+        property string systemPrefix: "com.victronenergy.system"
+        property string vebusPrefix: _vebusService.valid ? _vebusService.value : ""
 
 	property variant sys: theSystem
 	property bool hasAcSolarOnAcIn1: sys.pvOnAcIn1.power.valid
@@ -12,6 +16,15 @@ OverviewPage {
 	property bool hasAcSolar: hasAcSolarOnIn || hasAcSolarOnOut
 	property bool hasDcSolar: sys.pvCharger.power.valid
 	property bool hasDcAndAcSolar: hasAcSolar && hasDcSolar
+	property VBusItem runningBy: VBusItem { bind: Utils.path(bindPrefix, "/RunningByCondition") }
+
+        property VBusItem inverterCurrent: VBusItem { bind: Utils.path(vebusPrefix, "/Dc/0/Current"); unit: "A"}
+        property VBusItem inverterVoltage: VBusItem { bind: Utils.path(vebusPrefix, "/Dc/0/Voltage"); unit: "V"}
+
+	VBusItem {
+	        id: _vebusService
+                bind: Utils.path(systemPrefix, "/VebusService")
+        }
 
 	title: qsTr("Overview")
 
@@ -31,6 +44,14 @@ OverviewPage {
 
 		values:	OverviewAcValues {
 			connection: sys.acInput
+			width: parent.width
+			TileText {
+				anchors {
+					horizontalCenter: parent.horizontalCenter
+					top: parent.top; topMargin: 25
+				}
+				text: "Gen: " + runningBy.value
+			}
 		}
 
 		MbIcon {
@@ -49,6 +70,13 @@ OverviewPage {
 			horizontalCenter: parent.horizontalCenter
 			top: parent.top; topMargin: 5
 		}
+		TileText {
+			anchors {
+				horizontalCenter: parent.horizontalCenter
+				top: parent.top; topMargin: 100
+			}
+			text: inverterVoltage.value.toFixed(1) + "V  " + inverterCurrent.value.toFixed(1) + "A"
+		}
 	}
 
 	OverviewBox {
@@ -65,7 +93,15 @@ OverviewPage {
 		}
 
 		values: OverviewAcValues {
+			width: parent.width
 			connection: sys.acLoad
+			TileText {
+				anchors {
+					horizontalCenter: parent.horizontalCenter
+					top: parent.top; topMargin: 25
+				}
+				text: (sys.acLoad.power.value/115).toFixed(1)  + "A"
+			}
 		}
 	}
 
@@ -127,7 +163,7 @@ OverviewPage {
 
 		values: TileText {
 			anchors.centerIn: parent
-			text: sys.dcSystem.power.format(0)
+			text: (-sys.dcSystem.power.value).toFixed(0) + "W " + (-sys.dcSystem.power.value / sys.battery.voltage.value).toFixed(0)+"A"
 		}
 	}
 
@@ -311,4 +347,25 @@ OverviewPage {
 			bottom: dcSystemBox.verticalCenter
 		}
 	}
+
+        TileSpinBox {
+                id: acCurrentButton
+
+                anchors.top: acInBox.bottom
+                anchors.left: acInBox.left
+                isCurrentItem: (buttonIndex == 0)
+                focus: root.active && isCurrentItem
+
+                bind: Utils.path(vebusPrefix, "/Ac/ActiveIn/CurrentLimit")
+                title: qsTr("AC CURRENT LIMIT")
+		// titleColor: "#E74c3c"
+		color: "#C0392B"
+		width: 150
+                fontPixelSize: 12
+                unit: "A"
+                // buttonColor: "#979797"
+
+                // VBusItem { id: currentLimitIsAdjustable; bind: Utils.path(vebusPrefix, "/Ac/ActiveIn/CurrentLimitIsAdjustable") }
+	}
+
 }
