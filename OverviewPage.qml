@@ -75,7 +75,14 @@ StackPage {
 		if (type === undefined)
 			return qsTr("AC Input")
 		if (type === 240)
-			return ""
+			return qsTr("Island")
 		return acSourceName[type]
+	}
+
+	function hoursDecimal(seconds)
+	{
+		if (seconds.valid)
+			return (seconds.value/3600).toFixed(1)
+		return "∞"
 	}
 }

@@ -7,6 +7,8 @@ OverviewPage {
 
         property string systemPrefix: "com.victronenergy.system"
         property string vebusPrefix: _vebusService.valid ? _vebusService.value : ""
+	property string generatorPrefix: "com.victronenergy.settings/Settings/Generator0"
+	property string startStopPrefix: "com.victronenergy.generator.startstop0/Generator0"
 
 	property variant sys: theSystem
 	property bool hasAcSolarOnAcIn1: sys.pvOnAcIn1.power.valid
@@ -16,7 +18,6 @@ OverviewPage {
 	property bool hasAcSolar: hasAcSolarOnIn || hasAcSolarOnOut
 	property bool hasDcSolar: sys.pvCharger.power.valid
 	property bool hasDcAndAcSolar: hasAcSolar && hasDcSolar
-	property VBusItem runningBy: VBusItem { bind: Utils.path(bindPrefix, "/RunningByCondition") }
 
         property VBusItem inverterCurrent: VBusItem { bind: Utils.path(vebusPrefix, "/Dc/0/Current"); unit: "A"}
         property VBusItem inverterVoltage: VBusItem { bind: Utils.path(vebusPrefix, "/Dc/0/Voltage"); unit: "V"}
@@ -26,6 +27,9 @@ OverviewPage {
                 bind: Utils.path(systemPrefix, "/VebusService")
         }
 
+	// Keeps track of which button on the bottom row is active
+	property int buttonIndex: 0
+
 	title: qsTr("Overview")
 
 	OverviewBox {
@@ -33,14 +37,17 @@ OverviewPage {
 
 		width: 148
 		height: showStatusBar ? 100 : 120
-		title: getAcSourceName(sys.acSource)
-		titleColor: "#E74c3c"
-		color: "#C0392B"
+		title: getAcSourceName(sys.acSource) + " " + sys.acSource
+		titleColor: sys.acInput.value > 0 ? "#E74c3c" : "#808080"
+		color: sys.acInput.value > 0 ? "#C0392B" : "#606060"
 
 		anchors {
 			top: multi.top
 			left: parent.left; leftMargin: 10
 		}
+
+		VBusItem { id: runningBy; bind: Utils.path(startStopPrefix, "/RunningByCondition") }
+		VBusItem { id: autoStart; bind: Utils.path(generatorPrefix, "/AutoStartEnabled") }
 
 		values:	OverviewAcValues {
 			connection: sys.acInput
@@ -50,7 +57,7 @@ OverviewPage {
 					horizontalCenter: parent.horizontalCenter
 					top: parent.top; topMargin: 25
 				}
-				text: "Gen: " + runningBy.value
+				text: (runningBy.value =="" ? (autoStart.value ? "GEN:AUTO" : "GEN:OFF") : "GEN:"+runningBy.value)
 			}
 		}
 
@@ -68,14 +75,14 @@ OverviewPage {
 		id: multi
 		anchors {
 			horizontalCenter: parent.horizontalCenter
-			top: parent.top; topMargin: 5
+			top: parent.top; topMargin: 2
 		}
 		TileText {
 			anchors {
 				horizontalCenter: parent.horizontalCenter
 				top: parent.top; topMargin: 100
 			}
-			text: inverterVoltage.value.toFixed(1) + "V  " + inverterCurrent.value.toFixed(1) + "A"
+			text: inverterVoltage.format(1) + "  " + inverterCurrent.format(1)
 		}
 	}
 
@@ -109,9 +116,10 @@ OverviewPage {
 		id: battery
 
 		soc: sys.battery.soc.valid ? sys.battery.soc.value : 0
+		charge: sys.battery.power.value > 0
 
 		anchors {
-			bottom: parent.bottom; bottomMargin: 5;
+			bottom: tanks.top; bottomMargin: 2;
 			left: parent.left; leftMargin: 10
 		}
 		values: Column {
@@ -136,7 +144,7 @@ OverviewPage {
 				}
 			}
 			TileText {
-				text: sys.battery.power.format(0)
+				text: sys.battery.power.format(0) + "  " + hoursDecimal(sys.battery.timeToGo)+"Hr"
 			}
 			TileText {
 				text: sys.battery.voltage.format(1) + "   " + sys.battery.current.format(1)
@@ -154,16 +162,21 @@ OverviewPage {
 		width: 105
 		height: 45
 		visible: hasDcSys.value > 0
-		title: qsTr("DC Power")
+		titleColor: sys.dcSystem.power.value >= 0 ? "#16a185" : "#E74c3c"
+		title: sys.dcSystem.power.value >= 0 ? qsTr("DC Power") : qsTr("DC Charge")
+		color: sys.dcSystem.power.value >= 0 ? "#1a9c8c" : "#C0392B" 
 
 		anchors {
 			horizontalCenter: multi.horizontalCenter
-			bottom: parent.bottom; bottomMargin: 5
+			bottom: tanks.top; bottomMargin: 2
 		}
 
-		values: TileText {
-			anchors.centerIn: parent
-			text: (-sys.dcSystem.power.value).toFixed(0) + "W " + (-sys.dcSystem.power.value / sys.battery.voltage.value).toFixed(0)+"A"
+		values: Column {
+			y: 5
+			width: parent.width
+			TileText {
+				text: Math.Abs(sys.dcSystem.power.value).toFixed(0) + "W " + Math.Abs(sys.dcSystem.power.value / sys.battery.voltage.value).toFixed(0)+"A"
+			}
 		}
 	}
 
@@ -178,13 +191,22 @@ OverviewPage {
 
 		anchors {
 			right: root.right; rightMargin: 10
-			bottom: root.bottom; bottomMargin: 5;
+			bottom: tanks.top; bottomMargin: 2;
 		}
 
-		values: TileText {
+		values: Column {
 			y: 5
-			text: sys.pvCharger.power.format(0)
-			font.pixelSize: 20
+			width: parent.width
+			TileText {
+				text: sys.pvCharger.power.format(0)
+				font.pixelSize: 20
+			}
+			TileText {
+				text: sys.pvCharger.voltage.format(1) + "  " + sys.pvCharger.current.format(1)
+			}
+			TileText {
+				text: sys.pvCharger.yield.format(1)
+			}
 		}
 	}
 
@@ -198,7 +220,7 @@ OverviewPage {
 
 		anchors {
 			right: root.right; rightMargin: 10;
-			bottom: root.bottom; bottomMargin: hasDcAndAcSolar ? 75 : 5
+			bottom: tanks.top; bottomMargin: hasDcAndAcSolar ? 75 : 2
 		}
 
 		OverviewAcValues {
@@ -222,7 +244,7 @@ OverviewPage {
 
 	OverviewEssReason {
 		anchors {
-			bottom: parent.bottom; bottomMargin: dcSystemBox.visible ? battery.height + 15 : 5
+			bottom: tanks.top; bottomMargin: dcSystemBox.visible ? battery.height + 15 : 2
 			horizontalCenter: parent.horizontalCenter; horizontalCenterOffset: dcSystemBox.visible ? -(root.width / 2 - battery.width / 2 - 10)  : 0
 		}
 	}
@@ -348,24 +370,201 @@ OverviewPage {
 		}
 	}
 
+	// Inverter controls borrowed from OverviewMobile
+
+	Keys.forwardTo: [keyHandler]
+
+	Item {
+		id: keyHandler
+		Keys.onLeftPressed: {
+			if (buttonIndex > 0)
+				buttonIndex--
+
+			event.accepted = true
+		}
+
+		Keys.onRightPressed: {
+			if (buttonIndex < 1)
+				buttonIndex++
+
+			event.accepted = true
+		}
+	}
+
+	MouseArea {
+		anchors.fill: parent
+		enabled: parent.active
+		onPressed: mouse.accepted = acCurrentButton.expanded
+		onClicked: acCurrentButton.cancel()
+	}
+
         TileSpinBox {
                 id: acCurrentButton
 
-                anchors.top: acInBox.bottom
-                anchors.left: acInBox.left
+		anchors {
+			bottom: acInBox.bottom; bottomMargin: 3
+			right: acInBox.right; rightMargin: 3
+		}
                 isCurrentItem: (buttonIndex == 0)
                 focus: root.active && isCurrentItem
 
                 bind: Utils.path(vebusPrefix, "/Ac/ActiveIn/CurrentLimit")
-                title: qsTr("AC CURRENT LIMIT")
+                title: qsTr("AC LIMIT")
 		// titleColor: "#E74c3c"
-		color: "#C0392B"
-		width: 150
+		color: sys.acInput.value > 0 ? "#C0392B" : "#606060"
+		border.color: sys.acInput.value > 0 ? "#B0281A" : "#505050"
+		width: editMode ? 150 : 90
                 fontPixelSize: 12
                 unit: "A"
-                // buttonColor: "#979797"
+		readOnly: false
+	}
 
-                // VBusItem { id: currentLimitIsAdjustable; bind: Utils.path(vebusPrefix, "/Ac/ActiveIn/CurrentLimitIsAdjustable") }
+	Tile {
+		id: acModeButton
+		// place ON/OFF/CHG button over the switch in the image
+		anchors {
+			top: multi.top; topMargin: 62
+			left: multi.left; leftMargin: 36
+		}
+		width: 56
+		height: 32
+
+		property variant texts: { 4: qsTr("OFF"), 3: qsTr("ON"), 1: qsTr("CHG") }
+		property int value: mode.valid ? mode.value : 3
+		property int shownValue: applyAnimation2.running ? applyAnimation2.pendingValue : value
+
+		isCurrentItem: (buttonIndex == 1)
+		focus: root.active && isCurrentItem
+
+		color: "#4789d0"
+		border.color: "#3678c0"
+
+		editable: true
+		readOnly: false
+		// color: acModeButtonMouseArea.containsPressed ? "#d3d3d3" : "#A8A8A8"
+
+		values: [
+			TileText {
+				text: qsTr("%1").arg(acModeButton.texts[acModeButton.shownValue])
+			}
+		]
+
+		VBusItem { id: mode; bind: Utils.path(vebusPrefix, "/Mode") }
+
+		Keys.onSpacePressed: edit()
+
+		function edit() {
+			if (!mode.valid)
+				return
+
+			switch (shownValue) {
+			case 4:
+				applyAnimation2.pendingValue = 3
+				break;
+			case 3:
+				applyAnimation2.pendingValue = 1
+				break;
+			case 1:
+				applyAnimation2.pendingValue = 4
+				break;
+			}
+
+			applyAnimation2.restart()
+		}
+
+		MouseArea {
+			id: acModeButtonMouseArea
+			anchors.fill: parent
+			property bool containsPressed: containsMouse && pressed
+			onClicked:  {
+				buttonIndex = 1
+				parent.edit()
+			}
+		}
+
+		Rectangle {
+			id: timerRect2
+			height: 2
+			width: acModeButton.width * 0.8
+			visible: applyAnimation2.running
+			anchors {
+				bottom: parent.bottom; bottomMargin: 5
+				horizontalCenter: parent.horizontalCenter
+			}
+		}
+
+		SequentialAnimation {
+			id: applyAnimation2
+
+			property int pendingValue
+
+			NumberAnimation {
+				target: timerRect2
+				property: "width"
+				from: 0
+				to: acModeButton.width * 0.8
+				duration: 3000
+			}
+
+			ColorAnimation {
+				target: acModeButton
+				property: "color"
+				to: "#A8A8A8"
+				from: "#4789d0"
+				duration: 200
+			}
+
+			ColorAnimation {
+				target: acModeButton
+				property: "color"
+				to: "#4789d0"
+				from: "#A8A8A8"
+				duration: 200
+			}
+			PropertyAction {
+				target: timerRect2
+				property: "width"
+				value: 0
+			}
+
+			ScriptAction { script: mode.setValue(applyAnimation2.pendingValue) }
+
+			PauseAnimation { duration: 1000 }
+		}
+	}
+
+	ListView {
+		id: tanks
+
+		property int tileHeight: Math.ceil(height / Math.max(count, 2))
+		interactive: false // static tiles
+
+		/*
+		model: tanksModel
+		delegate: TileTank {
+			width: tanksColum.width
+			height: tanksColum.tileHeight
+			pumpBindPrefix: root.pumpBindPreffix
+		}
+		*/
+
+		height: 28
+		width: root.width
+		anchors {
+			bottom: root.bottom
+			left: root.left
+		}
+
+		Tile {
+			// title: qsTr("TANKS")
+			anchors.fill: parent
+			values: TileText {
+				text: qsTr("No tanks found")
+				// width: parent.width
+				// wrapMode: Text.WordWrap
+			}
+			// z: -1
+		}
 	}
 
 }
