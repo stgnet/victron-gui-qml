@@ -177,6 +177,7 @@ MbPage {
 		submenu.subpage = page.createObject(submenu, {service: service, bindPrefix: service.name})
 
 		// sort on (initial) description
+		/* don't
 		var i = 0
 		for (i = 0; i < model.count - 2; i++ ) {
 			if (model.children[i].description.localeCompare(service.description) > 0)
@@ -184,6 +185,9 @@ MbPage {
 		}
 
 		model.insert(i, submenu)
+		*/
+		model.insert(model.count > 1 ? model.count - 2 : 0, submenu)
+
 
 		initListView()
 	}

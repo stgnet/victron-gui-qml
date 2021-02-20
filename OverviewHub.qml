@@ -36,18 +36,23 @@ OverviewPage {
 		id: acInBox
 
 		width: 148
-		height: showStatusBar ? 100 : 120
-		title: getAcSourceName(sys.acSource) + " " + sys.acSource
-		titleColor: sys.acInput.value > 0 ? "#E74c3c" : "#808080"
-		color: sys.acInput.value > 0 ? "#C0392B" : "#606060"
+		height: showStatusBar ? 100 : 120 + 12
+		title: getAcSourceName(sys.acSource) // + " " + sys.acSource
+		titleColor: sys.acSource!=240 ? "#E74c3c" : "#808080"
+		color: sys.acSource!=240 ? "#C0392B" : "#606060"
 
 		anchors {
 			top: multi.top
-			left: parent.left; leftMargin: 10
+			left: parent.left; leftMargin: 5
 		}
+
+		VBusItem { id: acInV; bind: Utils.path(vebusPrefix, "/Ac/ActiveIn/L1/V"); unit: "V" }
+		VBusItem { id: acInI; bind: Utils.path(vebusPrefix, "/Ac/ActiveIn/L1/I"); unit: "A" }
+		VBusItem { id: acInF; bind: Utils.path(vebusPrefix, "/Ac/ActiveIn/L1/F"); unit: "Hz" }
 
 		VBusItem { id: runningBy; bind: Utils.path(startStopPrefix, "/RunningByCondition") }
 		VBusItem { id: autoStart; bind: Utils.path(generatorPrefix, "/AutoStartEnabled") }
+		VBusItem { id: runToday; bind: Utils.path(startStopPrefix, "/TodayRuntime") }
 
 		values:	OverviewAcValues {
 			connection: sys.acInput
@@ -55,12 +60,26 @@ OverviewPage {
 			TileText {
 				anchors {
 					horizontalCenter: parent.horizontalCenter
-					top: parent.top; topMargin: 25
+					top: parent.top; topMargin: 28
 				}
-				text: (runningBy.value =="" ? (autoStart.value ? "GEN:AUTO" : "GEN:OFF") : "GEN:"+runningBy.value)
+				text: acInV.format(1) + " " + acInI.format(1) // + " " + acInF.format(1)
+			}
+			TileText {
+				anchors {
+					horizontalCenter: parent.horizontalCenter
+					top: parent.top; topMargin: 44
+				}
+				text: 	"GEN:" + (
+					runningBy.value =="" ? 
+						(
+							autoStart.value ? 
+								"AUTO "+hoursDecimal(runToday, "0.0")+"Hr":
+								"OFF"
+						) :
+						runningBy.value
+					)
 			}
 		}
-
 		MbIcon {
 			iconId: getAcSourceIcon(sys.acSource)
 			anchors {
@@ -69,6 +88,17 @@ OverviewPage {
 			}
 			opacity: 0.5
 		}
+		/*
+		TileText {
+			anchors {
+				bottom: parent.bottom
+				left: parent.left
+			}
+			height: 30
+			width: 40
+			text: hoursDecimal(runToday)+"Hr"
+		}
+		*/
 	}
 
 	Multi {
@@ -95,9 +125,13 @@ OverviewPage {
 		height: showStatusBar ? 100 : 120
 
 		anchors {
-			right: parent.right; rightMargin: 10
+			right: parent.right; rightMargin: 5
 			top: multi.top
 		}
+
+		VBusItem { id: acOutV; bind: Utils.path(vebusPrefix, "/Ac/Out/L1/V"); unit: "V" }
+		VBusItem { id: acOutI; bind: Utils.path(vebusPrefix, "/Ac/Out/L1/I"); unit: "A" }
+		VBusItem { id: acOutF; bind: Utils.path(vebusPrefix, "/Ac/Out/L1/F"); unit: "Hz" }
 
 		values: OverviewAcValues {
 			width: parent.width
@@ -105,10 +139,64 @@ OverviewPage {
 			TileText {
 				anchors {
 					horizontalCenter: parent.horizontalCenter
-					top: parent.top; topMargin: 25
+					top: parent.top; topMargin: 28
 				}
-				text: (sys.acLoad.power.value/115).toFixed(1)  + "A"
+				text: acOutV.format(1) + " " + acOutI.format(1)
 			}
+			TileText {
+				anchors {
+					horizontalCenter: parent.horizontalCenter
+					top: parent.top; topMargin: 44
+				}
+				text: acOutF.format(1)
+			}
+		}
+
+		// scaled ac load indicator bar with 5 colorized segments of 10a each
+		Rectangle {
+			anchors {
+				bottom: acLoadBox.bottom; bottomMargin: 5
+				right: acLoadBox.right; rightMargin: 5
+			}
+			width: 5
+			height: scaleTo(acOutI.value, 50, 50, parent.height)
+			color: "#F03030"
+		}
+		Rectangle {
+			anchors {
+				bottom: acLoadBox.bottom; bottomMargin: 5
+				right: acLoadBox.right; rightMargin: 5
+			}
+			width: 5
+			height: scaleTo(acOutI.value, 40, 50, parent.height)
+			color: "#C03060"
+		}
+		Rectangle {
+			anchors {
+				bottom: acLoadBox.bottom; bottomMargin: 5
+				right: acLoadBox.right; rightMargin: 5
+			}
+			width: 5
+			height: scaleTo(acOutI.value, 30, 50, parent.height)
+			color: "#903090"
+		}
+		Rectangle {
+			anchors {
+				bottom: acLoadBox.bottom; bottomMargin: 5
+				right: acLoadBox.right; rightMargin: 5
+			}
+			width: 5
+			height: scaleTo(acOutI.value, 20, 50, parent.height)
+			color: "#6030C0"
+		}
+		Rectangle {
+			anchors {
+				bottom: acLoadBox.bottom; bottomMargin: 5
+				right: acLoadBox.right; rightMargin: 5
+			}
+			width: 5
+			height: scaleTo(acOutI.value, 10, 50, parent.height)
+			color: "#3030F0"
 		}
 	}
 
@@ -116,11 +204,11 @@ OverviewPage {
 		id: battery
 
 		soc: sys.battery.soc.valid ? sys.battery.soc.value : 0
-		charge: sys.battery.power.value > 0
+		power: sys.battery.power.value
 
 		anchors {
 			bottom: tanks.top; bottomMargin: 2;
-			left: parent.left; leftMargin: 10
+			left: parent.left; leftMargin: 5
 		}
 		values: Column {
 			width: parent.width
@@ -144,7 +232,7 @@ OverviewPage {
 				}
 			}
 			TileText {
-				text: sys.battery.power.format(0) + "  " + hoursDecimal(sys.battery.timeToGo)+"Hr"
+				text: sys.battery.power.format(0) + "  " + hoursDecimal(sys.battery.timeToGo,"∞")+"Hr"
 			}
 			TileText {
 				text: sys.battery.voltage.format(1) + "   " + sys.battery.current.format(1)
@@ -162,9 +250,9 @@ OverviewPage {
 		width: 105
 		height: 45
 		visible: hasDcSys.value > 0
-		titleColor: sys.dcSystem.power.value >= 0 ? "#16a185" : "#E74c3c"
-		title: sys.dcSystem.power.value >= 0 ? qsTr("DC Power") : qsTr("DC Charge")
-		color: sys.dcSystem.power.value >= 0 ? "#1a9c8c" : "#C0392B" 
+		titleColor: sys.dcSystem.power.value >= 0 ? "#2ECC71" : "#E74c3c"
+		title: sys.dcSystem.power.value >= 0 ? qsTr("DC Load") : qsTr("DC Charge")
+		color: sys.dcSystem.power.value >= 0 ? "#27AE60" : "#C0392B"
 
 		anchors {
 			horizontalCenter: multi.horizontalCenter
@@ -175,7 +263,7 @@ OverviewPage {
 			y: 5
 			width: parent.width
 			TileText {
-				text: Math.Abs(sys.dcSystem.power.value).toFixed(0) + "W " + Math.Abs(sys.dcSystem.power.value / sys.battery.voltage.value).toFixed(0)+"A"
+				text: Math.abs(sys.dcSystem.power.value).toFixed(0) + "W " + Math.abs(sys.dcSystem.power.value / sys.battery.voltage.value).toFixed(0)+"A"
 			}
 		}
 	}
@@ -190,7 +278,7 @@ OverviewPage {
 		visible: hasDcSolar || hasDcAndAcSolar
 
 		anchors {
-			right: root.right; rightMargin: 10
+			right: root.right; rightMargin: 5
 			bottom: tanks.top; bottomMargin: 2;
 		}
 
@@ -219,7 +307,7 @@ OverviewPage {
 		visible: hasAcSolar
 
 		anchors {
-			right: root.right; rightMargin: 10;
+			right: root.right; rightMargin: 5;
 			bottom: tanks.top; bottomMargin: hasDcAndAcSolar ? 75 : 2
 		}
 
@@ -350,7 +438,7 @@ OverviewPage {
 			left: dcConnect.left
 			top: dcConnect.top
 
-			right: battery.right; rightMargin: 10
+			right: battery.right; rightMargin: 5
 			bottom: dcConnect.top
 		}
 	}
@@ -402,18 +490,17 @@ OverviewPage {
                 id: acCurrentButton
 
 		anchors {
-			bottom: acInBox.bottom; bottomMargin: 3
-			right: acInBox.right; rightMargin: 3
+			bottom: acInBox.bottom; bottomMargin: 2
+			right: acInBox.right; rightMargin: 2
 		}
                 isCurrentItem: (buttonIndex == 0)
                 focus: root.active && isCurrentItem
 
                 bind: Utils.path(vebusPrefix, "/Ac/ActiveIn/CurrentLimit")
                 title: qsTr("AC LIMIT")
-		// titleColor: "#E74c3c"
-		color: sys.acInput.value > 0 ? "#C0392B" : "#606060"
-		border.color: sys.acInput.value > 0 ? "#B0281A" : "#505050"
-		width: editMode ? 150 : 90
+		color: sys.acSource!=240 ? "#C0392B" : "#606060"
+		border.color: sys.acSource!=240 ? "#B0281A" : "#505050"
+		width: editMode ? acInBox.width : 88
                 fontPixelSize: 12
                 unit: "A"
 		readOnly: false
@@ -423,11 +510,11 @@ OverviewPage {
 		id: acModeButton
 		// place ON/OFF/CHG button over the switch in the image
 		anchors {
-			top: multi.top; topMargin: 62
+			top: multi.top; topMargin: 58
 			left: multi.left; leftMargin: 36
 		}
-		width: 56
-		height: 32
+		width: 60
+		height: 40
 
 		property variant texts: { 4: qsTr("OFF"), 3: qsTr("ON"), 1: qsTr("CHG") }
 		property int value: mode.valid ? mode.value : 3

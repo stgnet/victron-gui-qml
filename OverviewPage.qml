@@ -79,10 +79,15 @@ StackPage {
 		return acSourceName[type]
 	}
 
-	function hoursDecimal(seconds)
+	function hoursDecimal(seconds, nada)
 	{
-		if (seconds.valid)
-			return (seconds.value/3600).toFixed(1)
-		return "∞"
+		if (!seconds.valid)
+			return nada
+		return (seconds.value/3600).toFixed(seconds > 35640 ? 0 : 1)
 	}
+
+	function scaleTo(value, cutoff, max, pixels) {
+		return Math.floor(Math.min(value, cutoff, max) * pixels / max)
+	}
+
 }

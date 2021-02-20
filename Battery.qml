@@ -7,7 +7,7 @@ Item {
 	height: 101
 
 	property real soc: 80
-	property bool charge: false
+	property real power: 0
 	property string color: "#4789d0"
 	property string emptyColor: "#1abc9c"
 	property alias values: _values.children
@@ -50,7 +50,7 @@ Item {
 		SvgRectangle {
 			height: parent.height
 			width: parent.width
-			color: charge ? "#C0392B" : root.emptyColor
+			color: power > 0  ? "#C0392B" : (power == 0 ? "#606060" : root.emptyColor)
 			radius: 3
 		}
 
