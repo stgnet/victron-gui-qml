@@ -6,6 +6,9 @@ import "tanksensor.js" as TankSensor
 MbPage {
 	id: root
 	property string bindPrefix
+	property VBusItem rawUnit: VBusItem {
+		bind: Utils.path(bindPrefix, "/RawUnit")
+	}
 
 	model: VisualItemModel {
 
@@ -45,10 +48,21 @@ MbPage {
 		}
 
 		MbItemOptions {
+			id: sensorType
+			description: qsTr("Sensor type")
+			bind: Utils.path(bindPrefix, "/SenseType")
+			show: item.valid
+			possibleValues: [
+				MbOption { description: qsTr("Voltage"); value: 1 },
+				MbOption { description: qsTr("Current"); value: 2 }
+			]
+		}
+
+		MbItemOptions {
 			id: standard
 			description: qsTr("Standard")
 			bind: Utils.path(bindPrefix, "/Standard")
-			show: item.valid
+			show: item.valid && !sensorType.item.valid
 			possibleValues: [
 				MbOption { description: qsTr("European (0 to 180 Ohm)"); value: 0 },
 				MbOption { description: qsTr("US (240 to 30 Ohm)"); value: 1 },
@@ -57,17 +71,19 @@ MbPage {
 		}
 
 		MbSpinBox {
-			description: qsTr("Resistance when empty")
-			bind: Utils.path(bindPrefix, "/ResistanceWhenEmpty")
+			description: qsTr("Sensor value when empty")
+			bind: Utils.path(bindPrefix, "/RawValueEmpty")
 			show: standard.item.value === 2
-			unit: "Ω"
+			unit: rawUnit.value
+			stepSize: 0.1
 		}
 
 		MbSpinBox {
-			description: qsTr("Resistance when full")
-			bind: Utils.path(bindPrefix, "/ResistanceWhenFull")
+			description: qsTr("Sensor value when full")
+			bind: Utils.path(bindPrefix, "/RawValueFull")
 			show: standard.item.value === 2
-			unit: "Ω"
+			unit: rawUnit.value
+			stepSize: 0.1
 		}
 
 		MbItemOptions {
@@ -108,10 +124,20 @@ MbPage {
 			}
 		}
 
+		MbSpinBox {
+			description: qsTr("Averaging time")
+			bind: Utils.path(bindPrefix, "/FilterLength")
+			show: item.valid
+			unit: "s"
+			stepSize: 1
+			numOfDecimals: 0
+		}
+
 		MbItemValue {
-			description: qsTr("Sensor resistance")
-			item.bind: Utils.path(bindPrefix, "/Resistance")
-			item.unit: "Ω"
+			description: qsTr("Sensor value")
+			item.bind: Utils.path(bindPrefix, "/RawValue")
+			item.unit: rawUnit.value
+			item.decimals: 1
 			show: item.valid
 		}
 	}

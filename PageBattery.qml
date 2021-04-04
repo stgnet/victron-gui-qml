@@ -13,7 +13,6 @@ MbPage {
 	property VBusItem midVoltage: VBusItem { bind: service.path("/Dc/0/MidVoltage") }
 	property VBusItem productId: VBusItem { bind: service.path("/ProductId") }
 
-	property bool isLynxIon: productId.value === 0x0142 || productId.value === 0xA130 || (productId.value & 0xFFF0) === 0xA390
 	property bool isFiamm48TL: productId.value === 0xB012
 
 	title: service.description
@@ -21,10 +20,22 @@ MbPage {
 
 	model: VisualItemModel {
 		MbItemOptions {
+			description: qsTr("Switch")
+			bind: service.path("/Mode")
+			show: item.valid
+
+			possibleValues: [
+				MbOption { description: qsTr("Off"); value: 4; readonly: true },
+				MbOption { description: qsTr("Standby"); value: 0xfc },
+				MbOption { description: qsTr("On"); value: 3 }
+			]
+		}
+
+		MbItemOptions {
 			description: qsTr("State")
 			bind: service.path("/State")
 			readonly: true
-			show: isLynxIon
+			show: item.valid
 			possibleValues:[
 				MbOption { description: qsTr("Initializing"); value: 0 },
 				MbOption { description: qsTr("Initializing"); value: 1 },
@@ -49,7 +60,7 @@ MbPage {
 		MbItemBmsError {
 			description: qsTr("Error")
 			item.bind: service.path("/ErrorCode")
-			show: isLynxIon && item.valid
+			show: item.valid
 		}
 
 		MbItemRow {
@@ -215,6 +226,8 @@ MbPage {
 		}
 
 		MbSubMenu {
+			property VBusItem lastError: VBusItem { bind: service.path("/Diagnostics/LastErrors/1/Error") }
+
 			description: qsTr("Diagnostics")
 			subpage: Component {
 				PageLynxIonDiagnostics {
@@ -222,7 +235,7 @@ MbPage {
 					bindPrefix: service.path("")
 				}
 			}
-			show: isLynxIon
+			show: lastError.valid
 		}
 
 		MbSubMenu {
@@ -237,6 +250,8 @@ MbPage {
 		}
 
 		MbSubMenu {
+			property VBusItem allowToCharge: VBusItem { bind: service.path("/Io/AllowToCharge") }
+
 			description: qsTr("IO")
 			subpage: Component {
 				PageLynxIonIo {
@@ -244,10 +259,12 @@ MbPage {
 					bindPrefix: service.path("")
 				}
 			}
-			show: isLynxIon
+			show: allowToCharge.valid
 		}
 
 		MbSubMenu {
+			property VBusItem nrOfBatteries: VBusItem { bind: service.path("/System/NrOfBatteries") }
+
 			description: qsTr("System")
 			subpage:  Component {
 				PageLynxIonSystem {
@@ -255,7 +272,7 @@ MbPage {
 					bindPrefix: service.path("")
 				}
 			}
-			show: isLynxIon
+			show: nrOfBatteries.valid
 		}
 
 		MbSubMenu {

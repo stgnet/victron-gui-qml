@@ -1,7 +1,7 @@
 import QtQuick 1.1
 import com.victron.velib 1.0
 
-Rectangle {
+SvgRectangle {
 	id: reasonBox
 	width: reasonText.width * 1.2 + label.width
 	height: reasonText.height
@@ -12,6 +12,7 @@ Rectangle {
 	Text {
 		id: label
 		text: "ESS"
+		font.pixelSize: 14
 		width: paintedWidth + 7
 		height: parent.height
 		verticalAlignment: Text.AlignVCenter
@@ -19,7 +20,7 @@ Rectangle {
 		color: "white"
 	}
 
-	Rectangle {
+	SvgRectangle {
 		width: reasonText.width * 1.2
 		height: reasonText.height
 		color: "#1289A7"
@@ -43,7 +44,7 @@ Rectangle {
 		}
 	}
 
-	Rectangle {
+	SvgRectangle {
 		width: reasonBox.radius
 		height: reasonBox.height
 		color: "#1289A7"

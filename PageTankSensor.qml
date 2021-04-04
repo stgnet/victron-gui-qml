@@ -18,7 +18,7 @@ MbPage {
 		MbOption { description: qsTr("Black water (sewage)"); value: 5 }
 	]
 
-	property VBusItem connection: VBusItem { bind: Utils.path(bindPrefix, "/Mgmt/Connection") }
+	property VBusItem devInstance: VBusItem { bind: Utils.path(bindPrefix, "/DeviceInstance") }
 	property VBusItem customName: VBusItem { bind: Utils.path(bindPrefix, "/CustomName") }
 	property VBusItem fluidType: VBusItem {	bind: Utils.path(bindPrefix, "/FluidType") }
 	property VBusItem volumeUnit: VBusItem { bind: "com.victronenergy.settings/Settings/System/VolumeUnit" }
@@ -30,7 +30,7 @@ MbPage {
 		if (customName.valid && customName.value !== "")
 			return customName.value
 
-		var inputNumber = connection.valid ? connection.value.replace(/\D/g,'') : ""
+		var inputNumber = devInstance.valid ? devInstance.value : ""
 		var inputNumberStr = ""
 
 		if (inputNumber !== "")

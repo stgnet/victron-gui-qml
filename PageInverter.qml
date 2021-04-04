@@ -86,6 +86,18 @@ MbPage {
 		}
 
 		MbItemValue {
+			description: qsTr("Total yield")
+			item.bind: root.service.path("/Yield/User")
+			show: item.valid
+		}
+
+		MbItemValue {
+			description: qsTr("System yield")
+			item.bind: root.service.path("/Yield/System")
+			show: item.valid
+		}
+
+		MbItemValue {
 			description: qsTr("State of charge")
 			item.bind: service.path("/Soc")
 			item.unit: "%"
@@ -110,6 +122,28 @@ MbPage {
 				MbOption { description: qsTr("Off"); value: 0 },
 				MbOption { description: qsTr("On"); value: 1 }
 			]
+		}
+
+		MbSubMenu {
+			description: qsTr("Daily history")
+			show: inverter.isInverterCharger
+			subpage: Component {
+				PageSolarHistory {
+					title: qsTr("Daily history")
+					bindPrefix: root.bindPrefix
+				}
+			}
+		}
+
+		MbSubMenu {
+			description: qsTr("Overall history")
+			show: inverter.isInverterCharger
+			subpage: Component {
+				PageSolarStats {
+					title: qsTr("Overall history")
+					bindPrefix: root.bindPrefix
+				}
+			}
 		}
 
 		MbSubMenu {

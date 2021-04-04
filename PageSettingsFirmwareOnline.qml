@@ -22,7 +22,7 @@ MbPage {
 		}
 
 		MbItemOptions {
-			description: qsTr("Update feed")
+			description: "Update feed"
 			bind: Utils.path(bindPrefix, "/Settings/System/ReleaseType")
 			possibleValues: [
 				MbOption{description: qsTr("Latest release"); value: Updater.FirmwareRelease},

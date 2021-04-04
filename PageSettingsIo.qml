@@ -5,14 +5,15 @@ import "utils.js" as Utils
 MbPage {
 	id: root
 
+	property string adcService: "dbus/com.victronenergy.adc"
 	property string bindPrefix: "com.victronenergy.settings"
 
 	title: "I/O"
 
-	function rebootToRemoveToast()
+	function disconnectedDeviceToast()
 	{
 		var text = qsTr("This sensor will remain visible on the devices list, " +
-						"reboot to remove it.")
+						"Use remove disconnected devices to remove it.")
 		toast.createToast(text, 5000)
 	}
 
@@ -22,62 +23,19 @@ MbPage {
 			subpage: Component {
 				MbPage {
 					title: qsTr("Analog inputs")
-					model: VisualItemModel {
-						MbSwitch {
-							name: qsTr("Tank level sensor 1")
-							bind: Utils.path(bindPrefix, "/Settings/AnalogInput/Resistive/1/Function2")
-							show: valid
-							onCheckedChanged: if (valid && !checked) rebootToRemoveToast()
+					model: VeQItemTableModel {
+						uids: [Utils.path(adcService, "/Devices")]
+						flags: VeQItemTableModel.AddChildren |
+							   VeQItemTableModel.AddNonLeaves |
+							   VeQItemTableModel.DontAddItem
+					}
+					delegate: MbSwitch {
+						property VBusItem label: VBusItem {
+							bind: [model.uid, "/Label"]
 						}
-
-						MbSwitch {
-							name: qsTr("Tank level sensor 2")
-							bind: Utils.path(bindPrefix, "/Settings/AnalogInput/Resistive/2/Function2")
-							show: valid
-							onCheckedChanged: if (valid && !checked) rebootToRemoveToast()
-						}
-
-						MbSwitch {
-							name: qsTr("Tank level sensor 3")
-							bind: Utils.path(bindPrefix, "/Settings/AnalogInput/Resistive/3/Function2")
-							show: valid
-							onCheckedChanged: if (valid && !checked) rebootToRemoveToast()
-						}
-
-						MbSwitch {
-							name: qsTr("Tank level sensor 4")
-							bind: Utils.path(bindPrefix, "/Settings/AnalogInput/Resistive/4/Function2")
-							show: valid
-							onCheckedChanged: if (valid && !checked) rebootToRemoveToast()
-						}
-
-						MbSwitch {
-							name: qsTr("Temperature sensor 1")
-							bind: Utils.path(bindPrefix, "/Settings/AnalogInput/Temperature/1/Function2")
-							show: valid
-							onCheckedChanged: if (valid && !checked) rebootToRemoveToast()
-						}
-
-						MbSwitch {
-							name: qsTr("Temperature sensor 2")
-							bind: Utils.path(bindPrefix, "/Settings/AnalogInput/Temperature/2/Function2")
-							show: valid
-							onCheckedChanged: if (valid && !checked) rebootToRemoveToast()
-						}
-
-						MbSwitch {
-							name: qsTr("Temperature sensor 3")
-							bind: Utils.path(bindPrefix, "/Settings/AnalogInput/Temperature/3/Function2")
-							show: valid
-							onCheckedChanged: if (valid && !checked) rebootToRemoveToast()
-						}
-
-						MbSwitch {
-							name: qsTr("Temperature sensor 4")
-							bind: Utils.path(bindPrefix, "/Settings/AnalogInput/Temperature/4/Function2")
-							show: valid
-							onCheckedChanged: if (valid && !checked) rebootToRemoveToast()
-						}
+						name: label.value
+						bind: [model.uid, "/Function"]
+						onCheckedChanged: if (valid && !checked) disconnectedDeviceToast()
 					}
 				}
 			}
@@ -93,31 +51,31 @@ MbPage {
 						MbItemDigitalInput {
 							description: qsTr("Digital input 1")
 							bind: Utils.path(bindPrefix, "/Settings/DigitalInput/1/Type")
-							onDisabled: rebootToRemoveToast()
+							onDisabled: disconnectedDeviceToast()
 						}
 
 						MbItemDigitalInput {
 							description: qsTr("Digital input 2")
 							bind: Utils.path(bindPrefix, "/Settings/DigitalInput/2/Type")
-							onDisabled: rebootToRemoveToast()
+							onDisabled: disconnectedDeviceToast()
 						}
 
 						MbItemDigitalInput {
 							description: qsTr("Digital input 3")
 							bind: Utils.path(bindPrefix, "/Settings/DigitalInput/3/Type")
-							onDisabled: rebootToRemoveToast()
+							onDisabled: disconnectedDeviceToast()
 						}
 
 						MbItemDigitalInput {
 							description: qsTr("Digital input 4")
 							bind: Utils.path(bindPrefix, "/Settings/DigitalInput/4/Type")
-							onDisabled: rebootToRemoveToast()
+							onDisabled: disconnectedDeviceToast()
 						}
 
 						MbItemDigitalInput {
 							description: qsTr("Digital input 5")
 							bind: Utils.path(bindPrefix, "/Settings/DigitalInput/5/Type")
-							onDisabled: rebootToRemoveToast()
+							onDisabled: disconnectedDeviceToast()
 						}
 					}
 				}

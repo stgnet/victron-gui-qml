@@ -123,41 +123,28 @@ MbPage {
 			show: trackers >= 2
 		}
 
-		MbItemRow {
-			description: qsTr("Tracker 1")
+		MbItemTracker {
+			bindPrefix: root.bindPrefix
+			nr: 0
 			show: trackers >= 2
-			values: [
-				MbTextBlock { item.bind: service.path("/Pv/0/V"); width: 90; height: 25 },
-				MbTextBlock { item.bind: service.path("/Pv/0/I"); width: 90; height: 25 },
-				MbTextBlock { item.bind: service.path("/Pv/0/P"); width: 90; height: 25 }
-			]
 		}
-		MbItemRow {
-			description: qsTr("Tracker 2")
+
+		MbItemTracker {
+			bindPrefix: root.bindPrefix
+			nr: 1
 			show: trackers >= 2
-			values: [
-				MbTextBlock { item.bind: service.path("/Pv/1/V"); width: 90; height: 25 },
-				MbTextBlock { item.bind: service.path("/Pv/1/I"); width: 90; height: 25 },
-				MbTextBlock { item.bind: service.path("/Pv/1/P"); width: 90; height: 25 }
-			]
 		}
-		MbItemRow {
-			description: qsTr("Tracker 3")
+
+		MbItemTracker {
+			bindPrefix: root.bindPrefix
+			nr: 2
 			show: trackers >= 3
-			values: [
-				MbTextBlock { item.bind: service.path("/Pv/2/V"); width: 90; height: 25 },
-				MbTextBlock { item.bind: service.path("/Pv/2/I"); width: 90; height: 25 },
-				MbTextBlock { item.bind: service.path("/Pv/2/P"); width: 90; height: 25 }
-			]
 		}
-		MbItemRow {
-			description: qsTr("Tracker 4")
+
+		MbItemTracker {
+			bindPrefix: root.bindPrefix
+			nr: 3
 			show: trackers >= 4
-			values: [
-				MbTextBlock { item.bind: service.path("/Pv/3/V"); width: 90; height: 25 },
-				MbTextBlock { item.bind: service.path("/Pv/3/I"); width: 90; height: 25 },
-				MbTextBlock { item.bind: service.path("/Pv/3/P"); width: 90; height: 25 }
-			]
 		}
 
 		MbItemRow {

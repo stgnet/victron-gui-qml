@@ -5,28 +5,56 @@ MbPage {
 	id: root
 	title: qsTr("Device List")
 
-	model: VisualItemModel {
-		MbSubMenu {
-			id: menuNotifications
-			description: qsTr("Notifications")
-			item: VBusItem {
-				property variant active: NotificationCenter.notifications.filter(
-											 function isActive(obj) { return obj.active} )
-				value: active.length > 0 ? active.length : ""
+	model: VisualModels {
+		VisualDataModel {
+			model: VeSortFilterProxyModel {
+				model: DeviceList {
+					id: deviceList
+					onRowsAboutToBeRemoved: {
+						for (var i = first; i <= last; i++)
+							deviceList.page(i).destroy()
+					}
+				}
+				sortRole: DeviceList.DescriptionRole
+				dynamicSortFilter: true
+				naturalSort: true
+				sortCaseSensitivity: Qt.CaseInsensitive
 			}
-			subpage: Component { PageNotifications {} }
-		}
 
-		MbSubMenu {
-			description: qsTr("Settings")
-			subpage: Component { PageSettings {} }
+			delegate: MbDevice {
+				iconId: "icon-toolbar-enter"
+				service: model.page.service
+				subpage: model.page
+			}
 		}
-	}
+		VisualItemModel {
+			MbSubMenu {
+				id: menuNotifications
+				description: qsTr("Notifications")
+				item: VBusItem {
+					property variant active: NotificationCenter.notifications.filter(
+												 function isActive(obj) { return obj.active} )
+					value: active.length > 0 ? active.length : ""
+				}
+				subpage: Component { PageNotifications {} }
+			}
 
-	Component {
-		id: submenuLoader
-		MbDevice {
-			iconId: "icon-toolbar-enter"
+			MbSubMenu {
+				description: qsTr("Settings")
+				subpage: Component { PageSettings {} }
+			}
+
+			MbOK {
+				description: qsTr("Remove disconnected devices")
+				value: qsTr("Press to remove")
+				show: deviceList.disconnectedDevices != 0
+				editable: true
+
+				function clicked() {
+					listview.decrementCurrentIndex()
+					deviceList.removeDisconnected()
+				}
+			}
 		}
 	}
 
@@ -166,32 +194,13 @@ MbPage {
 			return;
 		}
 
-		var submenu = submenuLoader.createObject(root)
-		submenu.service = service
-
-		// option 1, load when being opened
-		// submenu.subpage = page
-		// submenu.subpageProperties = {service: service}
-
-		// option 2, create it now
-		submenu.subpage = page.createObject(submenu, {service: service, bindPrefix: service.name})
-
-		// sort on (initial) description
-		var i = 0
-		for (i = 0; i < model.count - 2; i++ ) {
-			if (model.children[i].description.localeCompare(service.description) > 0)
-				break;
-		}
-
-		model.insert(i, submenu)
-
+		deviceList.append(service, page.createObject(root, {service: service, bindPrefix: service.name}))
 		initListView()
 	}
 
 	Component.onCompleted: {
 		for (var i = 0; i < DBusServices.count; i++)
 			addService(DBusServices.at(i))
-		listview.currentIndex = 0
 	}
 
 	Connections {

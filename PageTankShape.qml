@@ -52,6 +52,7 @@ MbPage {
 	MbItemText {
 		wrapMode: Text.WordWrap
 		show: listview.count === 0
+		style.isCurrentItem: true
 		text: qsTr("No custom shape defined. Use 'Add' to define one with up to ten points. Note that 0% and 100% are implied.")
 	}
 

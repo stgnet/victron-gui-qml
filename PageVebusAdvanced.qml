@@ -158,6 +158,20 @@ MbPage {
 			onClicked: systemReset.setValue(1)
 		}
 
+		MbItemNoYes {
+			description: qsTr("AC input 1 ignored")
+			bind: service.path("/Ac/State/IgnoreAcIn1")
+			readonly: true
+			show: valid && isMulti
+		}
+
+		MbItemNoYes {
+			description: qsTr("AC input 2 ignored")
+			bind: service.path("/Ac/State/IgnoreAcIn2")
+			readonly: true
+			show: valid && isMulti
+		}
+
 		MbItemOptions {
 			description: qsTr("ESS Relay test")
 			bind: service.path("/Devices/0/ExtendStatus/WaitingForRelayTest")

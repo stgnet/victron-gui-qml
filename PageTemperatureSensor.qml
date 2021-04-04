@@ -22,7 +22,7 @@ MbPage {
 		if (customName.valid && customName.value !== "")
 			return customName.value
 
-		var inputNumber = connection.valid ? connection.value.replace(/\D/g,'') : ""
+		var inputNumber = devInstance.valid ? devInstance.value : ""
 		var inputNumberStr = ""
 
 		if (inputNumber !== "")
@@ -46,8 +46,8 @@ MbPage {
 	}
 
 	VBusItem {
-		id: connection
-		bind: Utils.path(root.bindPrefix, "/Mgmt/Connection")
+		id: devInstance
+		bind: Utils.path(root.bindPrefix, "/DeviceInstance")
 	}
 
 	model: VisualItemModel {

@@ -3,6 +3,7 @@ import "utils.js" as Utils
 
 MbPage {
 	property VBusItem maxChargeCurrent: VBusItem {bind: Utils.path("com.victronenergy.settings", "/Settings/SystemSetup/MaxChargeCurrent")}
+	property VBusItem maxChargeVoltage: VBusItem {bind: Utils.path("com.victronenergy.settings", "/Settings/SystemSetup/MaxChargeVoltage")}
 	property variant availableSensors: availableTemperatureSensors.valid ? availableTemperatureSensors.value : {}
 	property VBusItem availableTemperatureSensors: VBusItem {bind: Utils.path("com.victronenergy.system", "/AvailableTemperatureServices")}
 	property VBusItem autoSelectedTemperatureService: VBusItem {bind: Utils.path("com.victronenergy.system", "/AutoSelectedTemperatureService")}
@@ -61,13 +62,34 @@ MbPage {
 
 		MbSpinBox {
 			id: startValue
-			description: "Maximum charge current"
+			description: qsTr("Maximum charge current")
 			bind: maxChargeCurrent.bind
 			unit: "A"
 			numOfDecimals: 0
 			stepSize: 1
 			min: 0
 			show: maxChargeCurrentSwitch.show && maxChargeCurrentSwitch.checked
+		}
+
+		MbSwitch {
+			function edit() {
+				maxChargeVoltage.setValue(maxChargeVoltage.value === 0.0 ? 55.0 : 0.0)
+			}
+
+			id: maxChargeVoltageSwitch
+			name: qsTr("Limit managed battery charge voltage")
+			checked: maxChargeVoltage.value > 0
+			enabled: userHasWriteAccess
+			show: dvccSwitch.checked
+		}
+
+		MbSpinBox {
+			description: qsTr("Maximum charge voltage")
+			bind: maxChargeVoltage.bind
+			unit: "V"
+			numOfDecimals: 1
+			stepSize: 0.1
+			show: maxChargeVoltageSwitch.show && maxChargeVoltageSwitch.checked
 		}
 
 		MbSwitchForced {
