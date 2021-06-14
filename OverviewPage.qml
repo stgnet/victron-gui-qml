@@ -79,11 +79,19 @@ StackPage {
 		return acSourceName[type]
 	}
 
-	function hoursDecimal(seconds, nada)
+	function decimalTime(seconds, nada)
 	{
 		if (!seconds.valid)
 			return nada
-		return (seconds.value/3600).toFixed(seconds > 35640 ? 0 : 1)
+		if (seconds.value == 0)
+			return "--"
+		if (seconds.value > 86400)
+			return (seconds.value/3600).toFixed(0) + "Hr"
+		if (seconds.value >= 3600)
+			return (seconds.value/3600).toFixed(1) + "Hr"
+		if (seconds.value >= 60)
+			return (seconds.value/60).toFixed(1) + "Min"
+		return seconds.value.toFixed(0) + "Sec"
 	}
 
 	function scaleTo(value, cutoff, max, pixels) {

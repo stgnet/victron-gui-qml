@@ -18,6 +18,7 @@ OverviewPage {
 	property bool hasAcSolar: hasAcSolarOnIn || hasAcSolarOnOut
 	property bool hasDcSolar: sys.pvCharger.power.valid
 	property bool hasDcAndAcSolar: hasAcSolar && hasDcSolar
+	property variant timeToGo: sys.battery.timeToGo.valid ? sys.battery.timeToGo.value : 172800
 
         property VBusItem inverterCurrent: VBusItem { bind: Utils.path(vebusPrefix, "/Dc/0/Current"); unit: "A"}
         property VBusItem inverterVoltage: VBusItem { bind: Utils.path(vebusPrefix, "/Dc/0/Voltage"); unit: "V"}
@@ -53,6 +54,7 @@ OverviewPage {
 		VBusItem { id: runningBy; bind: Utils.path(startStopPrefix, "/RunningByCondition") }
 		VBusItem { id: autoStart; bind: Utils.path(generatorPrefix, "/AutoStartEnabled") }
 		VBusItem { id: runToday; bind: Utils.path(startStopPrefix, "/TodayRuntime") }
+		VBusItem { id: runTotal; bind: Utils.path(generatorPrefix, "/AccumulatedTotal") }
 
 		values:	OverviewAcValues {
 			connection: sys.acInput
@@ -73,8 +75,8 @@ OverviewPage {
 					runningBy.value =="" ? 
 						(
 							autoStart.value ? 
-								"AUTO "+hoursDecimal(runToday, "0.0")+"Hr":
-								"OFF"
+								"AUTO "+decimalTime(runTotal, "--"):
+								"OFF "+decimalTime(runTotal, "--")
 						) :
 						runningBy.value
 					)
@@ -96,9 +98,20 @@ OverviewPage {
 			}
 			height: 30
 			width: 40
-			text: hoursDecimal(runToday)+"Hr"
+			text: decimalTime(runToday, "none")
 		}
 		*/
+		// ac current meter
+		Rectangle {
+			anchors {
+				bottom: parent.bottom; bottomMargin: 5
+				left: parent.left; leftMargin: 5
+			}
+			width: 5
+			height: scaleTo(acInI.value, 50, 50, parent.height-15)
+			color: "yellow"
+			radius: 3
+		}
 	}
 
 	Multi {
@@ -152,51 +165,16 @@ OverviewPage {
 			}
 		}
 
-		// scaled ac load indicator bar with 5 colorized segments of 10a each
+		// ac load meter (50a max)
 		Rectangle {
 			anchors {
 				bottom: acLoadBox.bottom; bottomMargin: 5
 				right: acLoadBox.right; rightMargin: 5
 			}
 			width: 5
-			height: scaleTo(acOutI.value, 50, 50, parent.height)
-			color: "#F03030"
-		}
-		Rectangle {
-			anchors {
-				bottom: acLoadBox.bottom; bottomMargin: 5
-				right: acLoadBox.right; rightMargin: 5
-			}
-			width: 5
-			height: scaleTo(acOutI.value, 40, 50, parent.height)
-			color: "#C03060"
-		}
-		Rectangle {
-			anchors {
-				bottom: acLoadBox.bottom; bottomMargin: 5
-				right: acLoadBox.right; rightMargin: 5
-			}
-			width: 5
-			height: scaleTo(acOutI.value, 30, 50, parent.height)
-			color: "#903090"
-		}
-		Rectangle {
-			anchors {
-				bottom: acLoadBox.bottom; bottomMargin: 5
-				right: acLoadBox.right; rightMargin: 5
-			}
-			width: 5
-			height: scaleTo(acOutI.value, 20, 50, parent.height)
-			color: "#6030C0"
-		}
-		Rectangle {
-			anchors {
-				bottom: acLoadBox.bottom; bottomMargin: 5
-				right: acLoadBox.right; rightMargin: 5
-			}
-			width: 5
-			height: scaleTo(acOutI.value, 10, 50, parent.height)
-			color: "#3030F0"
+			height: scaleTo(acOutI.value, 50, 50, parent.height-15)
+			color: "yellow"
+			radius: 3
 		}
 	}
 
@@ -232,11 +210,37 @@ OverviewPage {
 				}
 			}
 			TileText {
-				text: sys.battery.power.format(0) + "  " + hoursDecimal(sys.battery.timeToGo,"∞")+"Hr"
+				property VBusItem chargeTime: VBusItem{ value: -3600 * sys.battery.consumedAH.value / sys.battery.current.value }
+				text: sys.battery.power.format(0) + "  " + decimalTime(sys.battery.timeToGo, sys.battery.current.value > 0 ?  decimalTime(chargeTime, "ERR") : "∞Hr")
 			}
 			TileText {
 				text: sys.battery.voltage.format(1) + "   " + sys.battery.current.format(1)
 			}
+		}
+
+		// scaled amps meter vertical
+		Rectangle {
+			anchors {
+				bottom: parent.bottom; bottomMargin: 5
+				left: parent.left; leftMargin: 5
+			}
+			height: scaleTo(Math.abs(sys.battery.current.value), 250, 250, parent.height-25)
+			width: 5
+			color: "yellow"
+			radius: 3
+		}
+
+		// scaled time to go meter horizontal
+		Rectangle {
+			anchors {
+				bottom: parent.bottom; bottomMargin: 5
+				left: parent.left; leftMargin: 20
+			}
+			height: 5
+			width: scaleTo(timeToGo, 129600, 129600, parent.width-40)
+			radius: 3
+			color: timeToGo > 86400 ? "#00FF00" : timeToGo > 43200 ? "yellow" : "red"
+			visible: sys.battery.current.value < 0
 		}
 	}
 
@@ -387,7 +391,7 @@ OverviewPage {
 	Item {
 		id: dcConnect
 		anchors {
-			left: multi.horizontalCenter; leftMargin: hasAcSolar ? -20  : 0
+			left: multi.right; leftMargin: -20 // hasAcSolar ? -20  : 0
 			bottom: dcSystemBox.top; bottomMargin: 10
 		}
 	}
@@ -479,32 +483,6 @@ OverviewPage {
 		}
 	}
 
-	MouseArea {
-		anchors.fill: parent
-		enabled: parent.active
-		onPressed: mouse.accepted = acCurrentButton.expanded
-		onClicked: acCurrentButton.cancel()
-	}
-
-        TileSpinBox {
-                id: acCurrentButton
-
-		anchors {
-			bottom: acInBox.bottom; bottomMargin: 2
-			right: acInBox.right; rightMargin: 2
-		}
-                isCurrentItem: (buttonIndex == 0)
-                focus: root.active && isCurrentItem
-
-                bind: Utils.path(vebusPrefix, "/Ac/ActiveIn/CurrentLimit")
-                title: qsTr("AC LIMIT")
-		color: sys.acSource!=240 ? "#C0392B" : "#606060"
-		border.color: sys.acSource!=240 ? "#B0281A" : "#505050"
-		width: editMode ? acInBox.width : 88
-                fontPixelSize: 12
-                unit: "A"
-		readOnly: false
-	}
 
 	Tile {
 		id: acModeButton
@@ -514,9 +492,15 @@ OverviewPage {
 			left: multi.left; leftMargin: 36
 		}
 		width: 60
-		height: 40
+		height: 38
+		radius: 3
 
-		property variant texts: { 4: qsTr("OFF"), 3: qsTr("ON"), 1: qsTr("CHG") }
+		property variant texts: { 
+			4: qsTr("OFF"),
+			3: qsTr("ON"),
+			2: qsTr("INV"),
+			1: qsTr("CHG")
+		}
 		property int value: mode.valid ? mode.value : 3
 		property int shownValue: applyAnimation2.running ? applyAnimation2.pendingValue : value
 
@@ -544,6 +528,7 @@ OverviewPage {
 			if (!mode.valid)
 				return
 
+			// button turns ON or CHG only as a on/off toggle
 			switch (shownValue) {
 			case 4:
 				applyAnimation2.pendingValue = 3
@@ -551,8 +536,10 @@ OverviewPage {
 			case 3:
 				applyAnimation2.pendingValue = 1
 				break;
+			case 2:
+				applyAnimation2.pendingValue = 1
 			case 1:
-				applyAnimation2.pendingValue = 4
+				applyAnimation2.pendingValue = 3
 				break;
 			}
 
@@ -620,6 +607,34 @@ OverviewPage {
 		}
 	}
 
+	MouseArea {
+		anchors.fill: parent
+		enabled: parent.active
+		onPressed: mouse.accepted = acCurrentButton.expanded
+		onClicked: acCurrentButton.cancel()
+	}
+
+        TileSpinBox {
+                id: acCurrentButton
+
+		anchors {
+			top: multi.top; topMargin: editMode ?  0 : multi.height + 3
+			left: multi.left; leftMargin: 1
+		}
+                isCurrentItem: (buttonIndex == 0)
+                focus: root.active && isCurrentItem
+
+                bind: Utils.path(vebusPrefix, "/Ac/ActiveIn/CurrentLimit")
+                title: qsTr("AC LIMIT")
+		color: "#4789d0" // sys.acSource!=240 ? "#C0392B" : "#606060"
+		border.color: "#3678c0"
+		// border.color: sys.acSource!=240 ? "#E74c3c" : "#808080"
+		width: editMode ? acInBox.width : 88
+                fontPixelSize: 12
+                unit: "A"
+		readOnly: false
+		radius: 2
+	}
 	ListView {
 		id: tanks
 

@@ -135,6 +135,7 @@ Item {
 		property VBusItem current: VBusItem { bind: Utils.path(systemPrefix, "/Dc/Battery/Current"); unit: "A"}
 		property VBusItem soc: VBusItem { bind: Utils.path(systemPrefix, "/Dc/Battery/Soc"); unit: "%"}
 		property VBusItem timeToGo: VBusItem { bind: Utils.path(systemPrefix, "/Dc/Battery/TimeToGo"); unit: "s"}
+		property VBusItem consumedAH: VBusItem { bind: Utils.path(systemPrefix, "/Dc/Battery/ConsumedAmphours"); unit: "AH"}
 
 		// Get the battery charge state, see batteryState properties
 		property VBusItem state: VBusItem { bind: Utils.path(systemPrefix, "/Dc/Battery/State")}
