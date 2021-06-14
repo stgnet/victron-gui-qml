@@ -34,9 +34,9 @@ MbPage {
 
 				busOffCounters = stats.linkinfo.info_xstats !== undefined
 				if (stats.linkinfo.info_xstats) {
-					busOff.item.text = stats.linkinfo.info_xstats.bus_off
-					errorPassive.item.text = stats.linkinfo.info_xstats.error_passive
-					busWarn.item.text = stats.linkinfo.info_xstats.error_warning
+					busOff.item.text = "Bus off: " + stats.linkinfo.info_xstats.bus_off
+					errorPassive.item.text = "Err passive: " + stats.linkinfo.info_xstats.error_passive
+					busWarn.item.text = "Bus warn: " + stats.linkinfo.info_xstats.error_warning
 				}
 			}
 
@@ -56,74 +56,47 @@ MbPage {
 			id: stateItem
 			description: "State"
 
-			MbTextBlock {
-				id: state
-			}
-
-			MbTextBlock {
-				id: tec
-			}
-
-			MbTextBlock {
-				id: rec
-			}
+			MbTextBlock { id: state }
+			MbTextBlock { id: tec }
+			MbTextBlock { id: rec }
 		}
 
-		MbItemValue {
-			id: busOff
-			description: "Bus off count"
+		MbItemRow {
 			show: busOffCounters
-		}
 
-		MbItemValue {
-			id: errorPassive
-			description: "Error passive count"
-			show: busOffCounters
-		}
-
-		MbItemValue {
-			id: busWarn
-			description: "Bus warning count"
-			show: busOffCounters
+			MbTextBlock { id: busOff }
+			MbTextBlock { id: errorPassive }
+			MbTextBlock { id: busWarn }
 		}
 
 		MbItemRow {
 			description: "RX"
+			height: 2 * defaultHeight
 
-			MbTextBlock {
-				id: rx_packets
-			}
-
-			MbTextBlock {
-				id: rx_dropped
-			}
-		}
-
-		MbItemRow {
-			MbTextBlock {
-				id: rx_over_errors
-			}
-
-			MbTextBlock {
-				id: rx_errors
+			MbColumn {
+				MbRow {
+					MbTextBlock { id: rx_packets }
+					MbTextBlock { id: rx_dropped }
+				}
+				MbRow {
+					MbTextBlock { id: rx_over_errors }
+					MbTextBlock { id: rx_errors }
+				}
 			}
 		}
 
 		MbItemRow {
 			description: "TX"
+			height: 2 * defaultHeight
 
-			MbTextBlock {
-				id: tx_packets
-			}
-
-			MbTextBlock {
-				id: tx_dropped
-			}
-		}
-
-		MbItemRow {
-			MbTextBlock {
-				id: tx_errors
+			MbColumn {
+				MbRow {
+					MbTextBlock { id: tx_packets }
+					MbTextBlock { id: tx_dropped }
+				}
+				MbRow {
+					MbTextBlock { id: tx_errors }
+				}
 			}
 		}
 	}

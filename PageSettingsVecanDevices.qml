@@ -11,6 +11,7 @@ MbPage {
 	title: "VE.CAN devices"
 	model: VeQItemSortTableModel {
 		filterFlags: VeQItemSortTableModel.FilterOffline
+		dynamicSortFilter: true
 
 		model: VeQItemTableModel {
 			uids: [Utils.path(bindPrefix, "/Devices")]

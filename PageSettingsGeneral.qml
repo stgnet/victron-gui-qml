@@ -43,8 +43,8 @@ MbPage
 		}
 
 		MbEditBox {
-			show: user.accessLevel >= User.AccessSuperUser
 			description: "Set root password"
+			showAccessLevel: User.AccessSuperUser
 			onEditDone: {
 				if (newValue.length < 6) {
 					toast.createToast("Please enter at least 6 characters")
@@ -57,7 +57,7 @@ MbPage
 
 		MbSwitch {
 			name: qsTr("SSH on LAN")
-			show: user.accessLevel >= User.AccessSuperUser
+			showAccessLevel: User.AccessSuperUser
 			bind: "com.victronenergy.settings/Settings/System/SSHLocal"
 		}
 

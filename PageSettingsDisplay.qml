@@ -60,6 +60,10 @@ MbPage {
 			VBusItem { id: defaultOverview; bind: "com.victronenergy.settings/Settings/Gui/DefaultOverview" }
 		}
 
+		MbSwitch {
+			bind: Utils.path(bindPrefix, "/TanksOverview")
+			name: qsTr("Show tanks overview")
+		}
 
 		MbItemOptions {
 			id: languageSelect

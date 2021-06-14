@@ -8,7 +8,6 @@ QtObject {
 	property string bindPrefix
 	property AcData acOut: AcData {
 		bindPrefix: Utils.path(inverterData.bindPrefix, "/Ac/Out/L1")
-		onlyPositive: true
 	}
 
 	property VBusItem _isInverterCharger: VBusItem { bind: Utils.path(bindPrefix, "/IsInverterCharger") }

@@ -15,6 +15,7 @@ QtObject {
 
 	property string borderColor: "#ddd"
 	property string backgroundColor: isCurrentItem ? '#4790d0' : 'transparent'
+	property string backgroundColorService: isCurrentItem ? "#2969a1" : '#ffe9b7'
 	property string backgroundColorComponent: borderColor
 
 	// Text mainly used for description etc.

@@ -36,12 +36,13 @@ MbPage {
 			bind: "com.victronenergy.settings/Settings/Services/MqttN2k"
 			show: mqtt.checked && vePlatform.canInterfaces.length > 0 &&
 				user.accessLevel >= User.AccessSuperUser
+			backgroundColor: style.backgroundColorService
 		}
 
 		MbSwitch {
 			name: qsTr("Console on VE.Direct 1")
 			bind: "com.victronenergy.settings/Settings/Services/Console"
-			show: user.accessLevel >= User.AccessSuperUser
+			showAccessLevel: User.AccessSuperUser
 		}
 
 		MbSubMenu {
@@ -71,7 +72,7 @@ MbPage {
 		MbSwitch {
 			name: "CAN-bus over tcp/ip (debug)"
 			bind: "com.victronenergy.settings/Settings/Services/Socketcand"
-			show: user.accessLevel >= User.AccessService
+			showAccessLevel: User.AccessService
 		}
 	}
 }

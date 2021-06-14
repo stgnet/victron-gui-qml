@@ -14,6 +14,17 @@ MbPage {
 	}
 
 	model: VisualItemModel {
+		MbItemOptions {
+			description: qsTr("Nominal Voltage")
+			bind: Utils.path(bindPrefix, bindPage, "NominalVoltage")
+			possibleValues: [
+				MbOption { description: qsTr("12 Volt"); value: 12 },
+				MbOption { description: qsTr("24 Volt"); value: 24 },
+				MbOption { description: qsTr("48 Volt"); value: 48 }
+			]
+			show: valid
+		}
+
 		MbSpinBox {
 			description: qsTr("Capacity")
 			bind: Utils.path(bindPrefix, bindPage, "Capacity")
@@ -21,6 +32,7 @@ MbPage {
 			readOnly: locked
 			numOfDecimals: 0
 			stepSize: 1
+			show: valid
 		}
 
 		MbSpinBox {
@@ -30,6 +42,7 @@ MbPage {
 			readOnly: locked
 			numOfDecimals: 1
 			stepSize: 0.1
+			show: valid
 		}
 
 		MbSpinBox {
@@ -39,6 +52,7 @@ MbPage {
 			readOnly: locked
 			numOfDecimals: 1
 			stepSize: 0.1
+			show: valid
 		}
 
 		MbSpinBox {
@@ -48,6 +62,7 @@ MbPage {
 			readOnly: locked
 			numOfDecimals: 0
 			stepSize: 1
+			show: valid
 		}
 
 		MbSpinBox {
@@ -56,6 +71,7 @@ MbPage {
 			readOnly: locked
 			numOfDecimals: 2
 			stepSize: 0.01
+			show: valid
 		}
 
 		MbSpinBox {
@@ -65,6 +81,7 @@ MbPage {
 			readOnly: locked
 			numOfDecimals: 0
 			stepSize: 1
+			show: valid
 		}
 
 		MbSpinBox {
@@ -74,6 +91,7 @@ MbPage {
 			readOnly: locked
 			numOfDecimals: 2
 			stepSize: 0.01
+			show: valid
 		}
 
 		MbSpinBox {
@@ -83,6 +101,7 @@ MbPage {
 			readOnly: locked
 			numOfDecimals: 0
 			stepSize: 1
+			show: valid
 		}
 
 		MbItemText {
@@ -104,12 +123,14 @@ MbPage {
 			readOnly: locked
 			numOfDecimals: 0
 			stepSize: 1
+			show: valid
 		}
 
 		MbItemValue {
 			description: qsTr("Current offset")
 			item.bind: Utils.path(bindPrefix, bindPage, "CurrentOffset")
-			show: user.accessLevel >= User.AccessService
+			show: user.accessLevel >= User.AccessService && item.valid
+			backgroundColor: style.backgroundColorService
 		}
 
 		MbOK {
@@ -118,6 +139,7 @@ MbPage {
 			editable: !locked
 			cornerMark: false
 			onClicked: sync.setValue(1)
+			show: sync.valid
 
 			VBusItem {
 				id: sync
@@ -131,6 +153,7 @@ MbPage {
 			editable: true
 			cornerMark: false
 			onClicked: zero.setValue(1)
+			show: zero.valid
 
 			VBusItem {
 				id: zero

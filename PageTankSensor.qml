@@ -8,47 +8,10 @@ MbPage {
 
 	property variant service
 	property string bindPrefix
-
-	property list<MbOption> fluidTypes: [
-		MbOption { description: qsTr("Fuel"); value: 0 },
-		MbOption { description: qsTr("Fresh water"); value: 1 },
-		MbOption { description: qsTr("Waste water"); value: 2 },
-		MbOption { description: qsTr("Live well"); value: 3 },
-		MbOption { description: qsTr("Oil"); value: 4 },
-		MbOption { description: qsTr("Black water (sewage)"); value: 5 }
-	]
-
-	property VBusItem connection: VBusItem { bind: Utils.path(bindPrefix, "/Mgmt/Connection") }
-	property VBusItem customName: VBusItem { bind: Utils.path(bindPrefix, "/CustomName") }
-	property VBusItem fluidType: VBusItem {	bind: Utils.path(bindPrefix, "/FluidType") }
 	property VBusItem volumeUnit: VBusItem { bind: "com.victronenergy.settings/Settings/System/VolumeUnit" }
 
-	title: getTitle()
+	title: service.description
 	summary: level.item.valid ? level.item.text : status.valid ? status.text : "--"
-
-	function getTitle() {
-		if (customName.valid && customName.value !== "")
-			return customName.value
-
-		var inputNumber = connection.valid ? connection.value.replace(/\D/g,'') : ""
-		var inputNumberStr = ""
-
-		if (inputNumber !== "")
-			inputNumberStr = " (" + inputNumber + ")"
-
-		if (fluidType.valid)
-			return fluidTypeText(fluidType.value) + qsTr(" tank") + inputNumberStr
-		return service.description + inputNumberStr
-	}
-
-	function fluidTypeText(value) {
-		for (var i = 0; i < fluidTypes.length; i++) {
-			var option = fluidTypes[i];
-			if (option.value === value)
-				return option.description;
-		}
-		return qsTr("Unknown")
-	}
 
 	model: VisualItemModel {
 		MbItemOptions {
@@ -81,6 +44,18 @@ MbPage {
 				bind: service.path("/Remaining")
 				text: TankSensor.formatVolume(volumeUnit.value, item.value)
 			}
+		}
+
+		MbItemAlarm {
+			description: qsTr("Low level alarm")
+			bind: service.path("/Alarms/Low/State")
+			show: valid
+		}
+
+		MbItemAlarm {
+			description: qsTr("High level alarm")
+			bind: service.path("/Alarms/High/State")
+			show: valid
 		}
 
 		MbSubMenu {

@@ -13,7 +13,7 @@ MbPage {
 		MbItemValue {
 			description: qsTr("Uplink Status")
 			item.value: Qwacs.uplinkStatus
-			show: user.accessLevel >= User.AccessService
+			showAccessLevel: User.AccessService
 		}
 
 		MbSwitch {
@@ -26,13 +26,13 @@ MbPage {
 				property: "uplink"
 				value: uplinkOnOff.checked
 			}
-			show: user.accessLevel >= User.AccessService
+			showAccessLevel: User.AccessService
 		}
 
 		MbItemValue {
 			description: qsTr("Common Name")
 			item.value: Qwacs.commonName
-			show: user.accessLevel >= User.AccessService
+			showAccessLevel: User.AccessService
 		}
 
 		MbItemValue {
@@ -58,13 +58,13 @@ MbPage {
 		MbItemValue {
 			description: qsTr("Days up")
 			item.value: Qwacs.updays
-			show: user.accessLevel >= User.AccessService
+			showAccessLevel: User.AccessService
 		}
 
 		MbItemValue {
 			description: qsTr("Hours up")
 			item.value: Qwacs.uphours
-			show: user.accessLevel >= User.AccessService
+			showAccessLevel: User.AccessService
 		}
 	}
 }

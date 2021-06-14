@@ -183,7 +183,7 @@ MbPage {
 		MbSubMenu {
 			description: qsTr("Debug")
 			subpage: Component { PageDebug {} }
-			show: user.accessLevel >= User.AccessService
+			showAccessLevel: User.AccessService
 		}
 	}
 }

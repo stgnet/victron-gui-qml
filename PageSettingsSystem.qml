@@ -136,7 +136,7 @@ MbPage {
 
 		MbSubMenu {
 			id: mfd
-			description: qsTr("Marine MFD App configuration")
+			description: qsTr("Battery Measurements")
 			subpage: Component {
 				PageSettingsBatteries {
 					title: mfd.description
@@ -146,7 +146,7 @@ MbPage {
 
 		MbSubMenu {
 			description: "System Status"
-			show: user.accessLevel >= User.AccessSuperUser
+			showAccessLevel: User.AccessSuperUser
 			subpage: Component {
 				PageSettingsSystemStatus {}
 			}

@@ -7,7 +7,6 @@ Item {
 	height: 101
 
 	property real soc: 80
-	property real power: 0
 	property string color: "#4789d0"
 	property string emptyColor: "#1abc9c"
 	property alias values: _values.children
@@ -39,10 +38,7 @@ Item {
 		id: background
 
 		// NOTE: to remove the bottom of the terminals
-		border {
-			width: 2
-			color: "white"
-		}
+		border {width: 2; color: "white"}
 		height: root.height - leftTerminal.height
 		width: root.width
 		y: leftTerminal.height - 1
@@ -50,7 +46,7 @@ Item {
 		SvgRectangle {
 			height: parent.height
 			width: parent.width
-			color: power > 0  ? "#C0392B" : (power == 0 ? "#606060" : root.emptyColor)
+			color: root.emptyColor
 			radius: 3
 		}
 

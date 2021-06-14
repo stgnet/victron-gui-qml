@@ -75,27 +75,7 @@ StackPage {
 		if (type === undefined)
 			return qsTr("AC Input")
 		if (type === 240)
-			return qsTr("Island")
+			return ""
 		return acSourceName[type]
 	}
-
-	function decimalTime(seconds, nada)
-	{
-		if (!seconds.valid)
-			return nada
-		if (seconds.value == 0)
-			return "--"
-		if (seconds.value > 86400)
-			return (seconds.value/3600).toFixed(0) + "Hr"
-		if (seconds.value >= 3600)
-			return (seconds.value/3600).toFixed(1) + "Hr"
-		if (seconds.value >= 60)
-			return (seconds.value/60).toFixed(1) + "Min"
-		return seconds.value.toFixed(0) + "Sec"
-	}
-
-	function scaleTo(value, cutoff, max, pixels) {
-		return Math.floor(Math.min(value, cutoff, max) * pixels / max)
-	}
-
 }

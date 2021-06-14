@@ -151,6 +151,12 @@ VisualItemModel {
 			PageDeviceInfo {
 				title: qsTr("Device")
 				bindPrefix: root.bindPrefix
+
+				MbItemValue {
+					description: qsTr("Data manager version")
+					item.bind: service.path("/DataManagerVersion")
+					show: item.valid
+				}
 			}
 		}
 	}

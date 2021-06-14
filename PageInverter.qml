@@ -46,6 +46,7 @@ MbPage {
 
 		MbItemRow {
 			description: qsTr("AC-Out")
+			show: !inverter.isInverterCharger
 			values: [
 				MbTextBlock {
 					id: acVoltage
@@ -67,6 +68,22 @@ MbPage {
 				}
 			]
 		}
+		MbItemRow {
+			height: 2 * defaultHeight
+			description: qsTr("AC-Out")
+			show: inverter.isInverterCharger
+			values: MbColumn {
+				spacing: 2
+				MbRow {
+					MbTextBlock { item.text: inverter.acOut.voltage.text; width: 90; height: 25 }
+					MbTextBlock { item.text: inverter.acOut.current.text; width: 90; height: 25 }
+				}
+				MbRow {
+					MbTextBlock { item.text: inverter.acOut.power.text; width: 90; height: 25 }
+					MbTextBlock { item.text: inverter.acOut.frequency.text; width: 90; height: 25 }
+				}
+			}
+		}
 
 		MbItemRow {
 			description: qsTr("DC")
@@ -83,6 +100,18 @@ MbPage {
 				MbTextBlock { id: pvV; item.bind: service.path("/Pv/V"); width: 90; },
 				MbTextBlock { id: pvYield; item.bind: service.path("/Yield/Power"); width: 90; }
 			]
+		}
+
+		MbItemValue {
+			description: qsTr("Total yield")
+			item.bind: root.service.path("/Yield/User")
+			show: item.valid
+		}
+
+		MbItemValue {
+			description: qsTr("System yield")
+			item.bind: root.service.path("/Yield/System")
+			show: item.valid
 		}
 
 		MbItemValue {
@@ -110,6 +139,28 @@ MbPage {
 				MbOption { description: qsTr("Off"); value: 0 },
 				MbOption { description: qsTr("On"); value: 1 }
 			]
+		}
+
+		MbSubMenu {
+			description: qsTr("Daily history")
+			show: inverter.isInverterCharger
+			subpage: Component {
+				PageSolarHistory {
+					title: qsTr("Daily history")
+					bindPrefix: root.bindPrefix
+				}
+			}
+		}
+
+		MbSubMenu {
+			description: qsTr("Overall history")
+			show: inverter.isInverterCharger
+			subpage: Component {
+				PageSolarStats {
+					title: qsTr("Overall history")
+					bindPrefix: root.bindPrefix
+				}
+			}
 		}
 
 		MbSubMenu {

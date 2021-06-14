@@ -26,7 +26,7 @@ MbPage {
 		MbItemValue {
 			description: qsTr("Low Voltage Disconnect (always ignored)")
 			item.bind: service.path("/Info/BatteryLowVoltage")
-			show: user.accessLevel >= User.AccessService
+			showAccessLevel: User.AccessService
 		}
 	}
 }

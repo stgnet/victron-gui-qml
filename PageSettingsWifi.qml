@@ -100,7 +100,6 @@ MbPage {
 			if (tech.powered)
 				return qsTr("No access points")
 			else {
-				tech.powered = true;
 				return qsTr("No Wi-Fi adapter connected")
 			}
 		} else {

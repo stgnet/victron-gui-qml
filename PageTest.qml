@@ -19,6 +19,20 @@ MbPage {
 	 */
 	model: VisualItemModel {
 
+		MbSubMenu {
+			description: "Tank model test"
+			subpage: Component {
+				PageTestTankModel {}
+			}
+		}
+
+		MbSubMenu {
+			description: "Child model test"
+			subpage: Component {
+				PageTestChildModel {}
+			}
+		}
+
 		/*
 		 * Items can be open code like below and refer to an existing item, bind to a
 		 * remote one or a local version can be created.

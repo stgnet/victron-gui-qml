@@ -12,9 +12,11 @@ MbPage {
 	property string settingsPrefix: Utils.path("com.victronenergy.settings/Settings/Service/meteo/", deviceInstance.value)
 
 	title: service.description
+	summary: irradiance.item.text
 
 	model: VisualItemModel {
 		MbItemValue {
+			id: irradiance
 			description: qsTr("Irradiance")
 			item.bind: service.path("/Irradiance")
 			item.unit: "W/m2"

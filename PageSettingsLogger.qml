@@ -69,6 +69,7 @@ MbPage
 				MbOption { description: "#153 " + qsTr("Connection error"); value: 153 },
 				MbOption { description: "#154 " + qsTr("DNS failure"); value: 154 },
 				MbOption { description: "#155 " + qsTr("Routing error"); value: 155 },
+				MbOption { description: "#156 " + qsTr("VRM unavailable"); value: 156 },
 				MbOption { description: "#159 " + qsTr("Unknown error"); value: 159 }
 			]
 		}

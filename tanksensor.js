@@ -5,6 +5,50 @@
  */
 .pragma library
 
+var tankInfo = [
+	{
+		name: qsTr("Fuel"),
+		icon: "overview-fuel",
+		color: "#1abc9c"
+	},
+	{
+		name: qsTr("Fresh water"),
+		icon: "overview-fresh-water",
+		color:	"#4aa3df"
+	},
+	{
+		name: qsTr("Waste water"),
+		icon: "overview-waste-water",
+		color: "#95a5a6"
+	},
+	{
+		name: qsTr("Live well"),
+		icon: "overview-live-well",
+		color: "#dcc6e0"
+	},
+	{
+		name: qsTr("Oil"),
+		icon: "overview-oil",
+		color: "#f1a9a0"
+	},
+	{
+		name: qsTr("Black water"),
+		icon: "overview-black-water",
+		color: "#7f8c8d"
+	},
+	{
+		name: qsTr("Fuel (gasoline)"),
+		icon: "overview-fuel", 		// FIXME? use fuel for now
+		color: "#ebbc3a"
+	}
+]
+
+var unknownTank = {
+	name: qsTr("Tank"),
+	icon: "", // FIXME
+	color: "#4aa3df"
+}
+
 function getVolumeFormat(unit)
 {
 	var fmt = {}
@@ -37,6 +81,14 @@ function getVolumeFormat(unit)
 	}
 
 	return fmt
+}
+
+function info(type)
+{
+	if (type === undefined || type >=  tankInfo.length)
+		return unknownTank
+
+	return tankInfo[type]
 }
 
 function volumeConvertToSI(unit, volume)

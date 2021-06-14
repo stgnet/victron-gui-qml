@@ -5,7 +5,6 @@ Item {
 	id: root
 
 	property string systemPrefix: "com.victronenergy.system"
-	property string solarPrefix: "com.victronenergy.solarcharger.ttyS7" // FIX THIS
 	property string vebusPrefix: _vebusService.valid ? _vebusService.value : ""
 
 	property variant battery: _battery
@@ -58,9 +57,6 @@ Item {
 	QtObject {
 		id: _pvCharger
 		property VBusItem power: VBusItem { bind: Utils.path(systemPrefix, "/Dc/Pv/Power"); unit: "W"}
-		property VBusItem voltage: VBusItem { bind: Utils.path(solarPrefix, "/Pv/V"); unit: "V"}
-		property VBusItem current: VBusItem { bind: Utils.path(solarPrefix, "/Pv/I"); unit: "A"}
-		property VBusItem yield: VBusItem { bind: Utils.path(solarPrefix, "/Yield/User"); unit: "kWh"}
 	}
 
 	ObjectAcConnection {
@@ -134,8 +130,6 @@ Item {
 		property VBusItem voltage: VBusItem { bind: Utils.path(systemPrefix, "/Dc/Battery/Voltage"); unit: "V"}
 		property VBusItem current: VBusItem { bind: Utils.path(systemPrefix, "/Dc/Battery/Current"); unit: "A"}
 		property VBusItem soc: VBusItem { bind: Utils.path(systemPrefix, "/Dc/Battery/Soc"); unit: "%"}
-		property VBusItem timeToGo: VBusItem { bind: Utils.path(systemPrefix, "/Dc/Battery/TimeToGo"); unit: "s"}
-		property VBusItem consumedAH: VBusItem { bind: Utils.path(systemPrefix, "/Dc/Battery/ConsumedAmphours"); unit: "AH"}
 
 		// Get the battery charge state, see batteryState properties
 		property VBusItem state: VBusItem { bind: Utils.path(systemPrefix, "/Dc/Battery/State")}

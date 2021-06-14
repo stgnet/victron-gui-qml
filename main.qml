@@ -16,7 +16,7 @@ PageStackWindow {
 	property bool completed: false
 	property bool showAlert: NotificationCenter.alert
 	property bool alarm: NotificationCenter.alarm
-	property bool overviewsLoaded: defaultOverview.valid && generatorOverview.valid && mobileOverview.valid && startWithMenu.valid
+	property bool overviewsLoaded: defaultOverview.valid && generatorOverview.valid && mobileOverview.valid && tanksOverview.valid && startWithMenu.valid
 	property string bindPrefix: "com.victronenergy.settings"
 
 	property bool isNotificationPage: pageStack.currentPage && pageStack.currentPage.title === qsTr("Notifications")
@@ -69,6 +69,13 @@ PageStackWindow {
 		bind: "com.victronenergy.settings/Settings/Gui/MobileOverview"
 		onValueChanged:{
 			extraOverview("OverviewMobile.qml", value === 1)
+		}
+	}
+	VBusItem {
+		id: tanksOverview
+		bind: "com.victronenergy.settings/Settings/Gui/TanksOverview"
+		onValueChanged:{
+			extraOverview("OverviewTanks.qml", value === 1)
 		}
 	}
 

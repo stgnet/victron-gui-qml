@@ -104,6 +104,15 @@ PageStackWindow {
 		}
 	}
 
+	ToolbarHandlerPages {
+		id: mainToolbarHandler
+		isDefault: true
+	}
+
+	function showOverview()
+	{
+	}
+
 	Timer {
 		id: mover
 		property double pos: _counter / _loops

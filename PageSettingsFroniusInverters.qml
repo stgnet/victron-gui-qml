@@ -32,12 +32,12 @@ MbPage {
 		}
 	}
 
-	function getDescription(customName, uniqueId)
+	function getDescription(customName, serialNumber)
 	{
 		if (customName !== undefined && customName.length > 0)
 			return customName;
-		if (uniqueId !== undefined && uniqueId.length > 1)
-			return uniqueId.substring(1)
+		if (serialNumber !== undefined && serialNumber.length > 0)
+			return serialNumber;
 		return '--'
 	}
 
@@ -50,11 +50,12 @@ MbPage {
 			property VBusItem customNameItem: VBusItem { bind: Utils.path(inverterPath, "/CustomName") }
 			property VBusItem phaseItem: VBusItem { bind: Utils.path(inverterPath, "/Phase") }
 			property VBusItem positionItem: VBusItem { bind: Utils.path(inverterPath, "/Position") }
+			property VBusItem serialNumberItem: VBusItem { bind: Utils.path(inverterPath, "/SerialNumber") }
 
 			// Note: the names of all children of /Settings/Fronius/Inverters
 			// start with an 'I', which is not part of the uniqueId of the
 			// inverter, so we strip it here.
-			description: getDescription(customNameItem.value, uniqueId)
+			description: getDescription(customNameItem.value, serialNumberItem.value)
 			item.text: qsTr("AC") + "-" + convertPosition(positionItem.value) + " " + convertPhase(phaseItem.value)
 			item.textValid: true
 

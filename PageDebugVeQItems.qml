@@ -17,12 +17,12 @@ MbPage {
 	delegate: MbSubMenu {
 		id: submenu
 		description: id
-		hasSubpage: subModel.rowCount() > 0
+		hasSubpage: subModel.rowCount > 0
 
 		property VeQItemTableModel subModel: VeQItemTableModel {
 			uids: [uid]
 			flags: root.model.flags
-			onRowsInserted: hasSubpage = subModel.rowCount() > 0
+			onRowsInserted: hasSubpage = subModel.rowCount > 0
 		}
 
 		Component.onCompleted: {

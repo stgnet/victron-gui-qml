@@ -10,6 +10,7 @@ MbPage {
 
 	model: VeQItemSortTableModel {
 		filterFlags: VeQItemSortTableModel.FilterOffline
+		dynamicSortFilter: true
 		model: VeQItemTableModel {
 			uids: [Utils.path("dbus/", root.bindPrefix, "/Device")]
 			flags: VeQItemTableModel.AddChildren |

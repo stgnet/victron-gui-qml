@@ -90,6 +90,7 @@ MbPage {
 		MbItemValue {
 			description: qsTr("Accumulated running time since last test run")
 			show: user.accessLevel >= User.AccessService && nextTestRun.show
+			backgroundColor: style.backgroundColorService
 			item {
 				text: Utils.secondsToNoSecsString(item.value)
 				bind: Utils.path(startStopBindPrefix, "/TestRunIntervalRuntime")

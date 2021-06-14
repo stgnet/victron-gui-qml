@@ -9,6 +9,8 @@ MbPage {
 	model: VisualModels {
 		VisualDataModel {
 			model: VeQItemSortTableModel {
+				dynamicSortFilter: true
+
 				filterFlags: VeQItemSortTableModel.FilterOffline
 				filterRole: VeQItemTableModel.IdRole
 				filterRegExp: "^com\.victronenergy\.gps"

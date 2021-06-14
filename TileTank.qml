@@ -1,10 +1,12 @@
 import QtQuick 1.1
 import "utils.js" as Utils
+import "tanksensor.js" as TankSensor
 
 Tile {
 	id: root
 
-	property string bindPrefix: serviceName
+	property variant service
+	property string bindPrefix: service ? service.name : ""
 	property string pumpBindPrefix
 	property VBusItem levelItem: VBusItem { id: levelItem; bind: Utils.path(bindPrefix, "/Level"); decimals: 0; unit: "%" }
 	property VBusItem fluidTypeItem: VBusItem { id: fluidTypeItem; bind: Utils.path(bindPrefix, "/FluidType") }
@@ -14,12 +16,12 @@ Tile {
 	property alias level: levelItem.value
 	property int fullWarningLevel: ([2, 5].indexOf(fluidTypeItem.value) > -1) ? 80 : -1
 	property int emptyWarningLevel: !([2, 5].indexOf(fluidTypeItem.value) > -1) ? 20 : -1
-	property variant fluidTypes: [qsTr("FUEL"), qsTr("FRESH WATER"), qsTr("WASTE WATER"), qsTr("LIVE WELL"), qsTr("OIL"), qsTr("BLACK WATER")]
-	property variant fluidColor: ["#1abc9c", "#4aa3df", "#95a5a6", "#dcc6e0", "#f1a9a0", "#7f8c8d"]
 	property bool blink: true
+	property bool compact: false
+	property string tankName: service ? service.description : ""
 
-	title: fluidTypeItem.valid ? fluidTypes[fluidTypeItem.value] : "TANK"
-	color: fluidTypeItem.valid ? fluidColor[fluidTypeItem.value] : "#4aa3df"
+	title: compact ? "" : tankName.toUpperCase()
+	color: TankSensor.info(fluidTypeItem.value).color
 
 	Timer {
 		interval: 1000
@@ -27,6 +29,11 @@ Tile {
 		repeat: true
 		onTriggered: blink = !blink
 		onRunningChanged: if (!running) blink = true
+	}
+
+	function doScroll()
+	{
+		tankText.doScroll()
 	}
 
 	function warning()
@@ -38,31 +45,52 @@ Tile {
 		return false
 	}
 
-	values: Rectangle {
-		color: "#c0c0bd"
-		border { width:1; color: "white" }
+	values: Item {
 		width: root.width - 10
-		height: 21
+		height: compact ? root.height : 21
 
-		Rectangle {
-			id: valueBar
-			width: root.level / 100 * parent.width - 2
-			height: parent.height - 1
-			color: warning() ? "#e74c3c" : "#34495e"
-			opacity: blink ? 1 : 0.5
+		Marquee {
+			id: tankText
+			width: parent.width / 2
+			height: compact ? 13 : parent.height
+			text: compact ? tankName : ""
+			textHorizontalAlignment: Text.AlignLeft
+			visible: compact
+			scroll: false
 			anchors {
-				verticalCenter: parent.verticalCenter
-				left: parent.left; leftMargin: 1
+				verticalCenter: parent.verticalCenter; verticalCenterOffset: compact ? -9 : 0
 			}
 		}
 
-		Text {
-			font.pixelSize: 12
-			font.bold: true
-			text: root.levelItem.text
-			anchors.centerIn: parent
-			color: "white"
+		Rectangle {
+			color: "#c0c0bd"
+			border { width:1; color: "white" }
+			width: root.width - 10 -  (compact ? tankText.width + 3 : 0)
+			height: compact ? 13 : parent.height
+			anchors {
+				verticalCenter: parent.verticalCenter; verticalCenterOffset: compact ? -9 : 0
+				right: parent.right
+			}
+
+			Rectangle {
+				id: valueBar
+				width: root.level / 100 * parent.width - 2
+				height: parent.height - 1
+				color: warning() ? "#e74c3c" : "#34495e"
+				opacity: blink ? 1 : 0.5
+				anchors {
+					verticalCenter: parent.verticalCenter;
+					left: parent.left; leftMargin: 1
+				}
+			}
+
+			Text {
+				font.pixelSize: 12
+				font.bold: true
+				text: root.levelItem.text
+				anchors.centerIn: parent
+				color: "white"
+			}
 		}
 	}
-
 }

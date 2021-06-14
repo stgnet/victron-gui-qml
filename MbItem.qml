@@ -12,6 +12,8 @@ Item {
 	id: root
 	width: (parent ? parent.width : 0)
 	height: defaultHeight
+	show: user.accessLevel >= showAccessLevel
+
 	property int defaultHeight: style.itemHeight
 
 	property bool editMode
@@ -28,9 +30,11 @@ Item {
 
 	property bool cornerMark: false
 
+	property int showAccessLevel: User.AccessUser
 	property int writeAccessLevel: User.AccessInstaller
 	property bool userHasWriteAccess: user.accessLevel >= writeAccessLevel
 	property bool editable: true
+	property alias backgroundColor: background.color
 
 	// NOTE: this is added to our 4.8 qt version. Uncomment this line to run on a
 	// vanilla QT. But optional rows are then always visible.
@@ -94,7 +98,7 @@ Item {
 	Rectangle {
 		id: background
 		anchors.fill: parent
-		color: style.backgroundColor
+		color: showAccessLevel >= User.AccessSuperUser ? style.backgroundColorService : style.backgroundColor
 	}
 
 	MbIcon {

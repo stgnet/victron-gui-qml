@@ -9,7 +9,6 @@ MbPage {
 	property variant availableBatteries: getAvailableBatteries(batteryItem.value)
 
 	title: qsTr("Battery measurements")
-	model: Object.keys(availableBatteries)
 
 	function getAvailableBatteries(v) {
 		try {
@@ -37,42 +36,55 @@ MbPage {
 		return activeBatteryService.valid && (activeBatteryService.value === modelData)
 	}
 
-	delegate: Component {
-		MbSubMenu {
-			id: menu
-
-			property string configId: modelData.replace(/\./g, "_")
-			property bool activeBattery: isActiveBattery(modelData)
-
-			description: batteryTitle(modelData)
-			item {
-				bind: Utils.path(settingsPrefix, "/Settings/SystemSetup/Batteries/Configuration/", configId, "/Enabled")
-				text: item.valid ? (item.value || activeBattery ? qsTr("Visible") : qsTr("Hidden")) : item.invalidText
+	model: VisualModels {
+		VisualItemModel {
+			MbItemText {
+				text: qsTr("Use this menu to define which battery measurements to see on the VRM Portal and the MFD HTML5 App")
+				wrapMode: Text.WordWrap
+				horizontalAlignment: Text.AlignLeft
 			}
+		}
 
-			subpage: Component {
-				MbPage {
-					title: menu.description
-					model: VisualItemModel {
-						MbItemValue {
-							description: qsTr("Visible")
-							item.value: qsTr("Active battery monitor")
-							show: activeBattery
-						}
+		VisualDataModel {
+			model: Object.keys(availableBatteries)
+			delegate: Component {
+				MbSubMenu {
+					id: menu
 
-						MbSwitch {
-							name: qsTr("Visible")
-							enabled: true
-							show: !activeBattery
-							bind: Utils.path(settingsPrefix, "/Settings/SystemSetup/Batteries/Configuration/", configId, "/Enabled")
-						}
+					property string configId: modelData.replace(/\./g, "_")
+					property bool activeBattery: isActiveBattery(modelData)
 
-						MbEditBox {
-							description: qsTr("Name")
-							item.bind: Utils.path(settingsPrefix, "/Settings/SystemSetup/Batteries/Configuration/", configId, "/Name")
-							show: item.valid
-							maximumLength: 32
-							enableSpaceBar: true
+					description: batteryTitle(modelData)
+					item {
+						bind: Utils.path(settingsPrefix, "/Settings/SystemSetup/Batteries/Configuration/", configId, "/Enabled")
+						text: item.valid ? (item.value || activeBattery ? qsTr("Visible") : qsTr("Hidden")) : item.invalidText
+					}
+
+					subpage: Component {
+						MbPage {
+							title: menu.description
+							model: VisualItemModel {
+								MbItemValue {
+									description: qsTr("Visible")
+									item.value: qsTr("Active battery monitor")
+									show: activeBattery
+								}
+
+								MbSwitch {
+									name: qsTr("Visible")
+									enabled: true
+									show: !activeBattery
+									bind: Utils.path(settingsPrefix, "/Settings/SystemSetup/Batteries/Configuration/", configId, "/Enabled")
+								}
+
+								MbEditBox {
+									description: qsTr("Name")
+									item.bind: Utils.path(settingsPrefix, "/Settings/SystemSetup/Batteries/Configuration/", configId, "/Name")
+									show: item.valid
+									maximumLength: 32
+									enableSpaceBar: true
+								}
+							}
 						}
 					}
 				}

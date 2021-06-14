@@ -8,6 +8,7 @@ MbPage {
 	property string bindPrefix
 	property int productId
 
+	property int em24ProductId: 0xb017
 	property int smappeeProductId: 0xb018
 
 	function getRoleName(r)
@@ -65,6 +66,22 @@ MbPage {
 		bindPrefix = s.join('.');
 	}
 
+	function em24Locked()
+	{
+		return em24SwitchPos.item.valid && em24SwitchPos.item.value == 3;
+	}
+
+	function em24SwitchText(pos)
+	{
+		switch (pos) {
+		case 0: return qsTr("Unlocked (kVARh)");
+		case 1: return qsTr("Unlocked (2)");
+		case 2: return qsTr("Unlocked (1)");
+		case 3: return qsTr("Locked");
+		}
+		return qsTr("Unknown");
+	}
+
 	VBusItem {
 		id: allowedRoles
 		bind: Utils.path(root.bindPrefix, "/AllowedRoles")
@@ -89,6 +106,37 @@ MbPage {
 				MbOption { description: qsTr("AC Output"); value: 1 }
 			]
 		}
+
+		/* EM24 settings */
+
+		MbItemOptions {
+			description: qsTr("Phase configuration")
+			show: productId == em24ProductId
+			bind: Utils.path(root.bindPrefix, "/PhaseConfig")
+			readonly: em24Locked()
+			possibleValues: [
+				MbOption { description: "3P.n"; value: 0 },
+				MbOption { description: "3P.1"; value: 1 },
+				MbOption { description: "2P";   value: 2 },
+				MbOption { description: "1P";   value: 3 },
+				MbOption { description: "3P";   value: 4 }
+			]
+		}
+
+		MbItemValue {
+			id: em24SwitchPos
+			description: qsTr("Switch position")
+			show: productId == em24ProductId
+			item.bind: Utils.path(root.bindPrefix, "/SwitchPos")
+			item.text: item.valid ? em24SwitchText(item.value) : "--"
+		}
+
+		MbItemText {
+			text: qsTr("Set switch in an unlocked position to change settings")
+			show: productId == em24ProductId && em24Locked()
+		}
+
+		/* Smappee settings */
 
 		MbItemOptions {
 			description: qsTr("Phase configuration")

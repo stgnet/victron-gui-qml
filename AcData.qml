@@ -34,6 +34,7 @@ QtObject {
 	}
 
 	property VBusItem frequency: VBusItem {
+		bind: Utils.path(bindPrefix, "/F")
 		decimals: 1
 		unit: "Hz"
 	}

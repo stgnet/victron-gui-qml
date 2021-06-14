@@ -333,7 +333,7 @@ MbPage {
 		MbSubMenu {
 			id: acSensorMenu
 			description: "AC Sensors"
-			show: user.accessLevel >= User.AccessService
+			showAccessLevel: User.AccessService
 			subpage: Component {
 				PageAcSensors {
 					title: acSensorMenu.description
@@ -345,7 +345,7 @@ MbPage {
 		MbSubMenu {
 			id: debugMenu
 			description: "Debug"
-			show: user.accessLevel >= User.AccessService
+			showAccessLevel: User.AccessService
 			subpage: Component {
 				PageVebusDebug {
 					title: debugMenu.description

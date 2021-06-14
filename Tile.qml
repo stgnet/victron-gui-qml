@@ -22,11 +22,11 @@ Rectangle {
 		font.pixelSize: 13
 		text: title
 		color: "white"
+		height: text === "" ? 0 : paintedHeight
 		anchors {
 			top: parent.top; topMargin: 5
 			left: parent.left; leftMargin: 5
 		}
-		Component.onCompleted: if (text === "") height = 0
 	}
 
 	Rectangle {

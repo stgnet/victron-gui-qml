@@ -45,7 +45,7 @@ MbPage {
 
 		MbItemValue {
 			description: qsTr("Sensor voltage")
-			item.bind: Utils.path(bindPrefix, "/Voltage")
+			item.bind: Utils.path(bindPrefix, "/RawValue")
 			item.decimals: 2
 			item.unit: "V"
 		}

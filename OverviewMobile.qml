@@ -28,7 +28,7 @@ OverviewPage {
 
 	title: qsTr("Mobile")
 
-	Component.onCompleted: discoverTanks()
+	Component.onCompleted: discoverMulti()
 
 	ListView {
 		id: pwColumn
@@ -244,18 +244,33 @@ OverviewPage {
 		property int tileHeight: Math.ceil(height / Math.max(count, 2))
 		width: 134
 		interactive: false // static tiles
-
-		model: tanksModel
+		model: TankModel { id: tankModel }
 		delegate: TileTank {
+			// Without an intermediate assignment this will trigger a binding loop warning.
+			property variant theService: DBusServices.get(buddy.id)
+			service: theService
 			width: tanksColum.width
 			height: tanksColum.tileHeight
 			pumpBindPrefix: root.pumpBindPreffix
+			compact: tankModel.rowCount > (pumpButton.pumpEnabled ? 4 : 5)
+			Connections {
+				target: scrollTimer
+				onTriggered: doScroll()
+			}
 		}
 
 		anchors {
 			top: root.top
-			bottom: acModeButton.top
+			bottom: pumpButton.pumpEnabled ? acModeButton.top : acModeButton.bottom
 			right: root.right
+		}
+
+		// Synchronise tank name text scroll start
+		Timer {
+			id: scrollTimer
+			interval: 15000
+			repeat: true
+			running: root.active && tankModel.rowCount > 4
 		}
 
 		Tile {
@@ -270,10 +285,6 @@ OverviewPage {
 		}
 	}
 
-	ListModel {
-		id: tanksModel
-	}
-
 	Keys.forwardTo: [keyHandler]
 
 	Item {
@@ -286,7 +297,7 @@ OverviewPage {
 		}
 
 		Keys.onRightPressed: {
-			if (buttonIndex < 2)
+			if (buttonIndex < (pumpButton.pumpEnabled ? 2 : 1))
 				buttonIndex++
 
 			event.accepted = true
@@ -311,7 +322,7 @@ OverviewPage {
 		bind: Utils.path(vebusPrefix, "/Ac/ActiveIn/CurrentLimit")
 		title: qsTr("AC CURRENT LIMIT")
 		color: containsMouse && !editMode ? "#d3d3d3" : "#A8A8A8"
-		width: show ? 160 : 0
+		width: pumpButton.pumpEnabled ? 160 : 173
 		fontPixelSize: 14
 		unit: "A"
 		readOnly: currentLimitIsAdjustable.value !== 1 || numberOfMultis > 1
@@ -364,7 +375,7 @@ OverviewPage {
 
 		editable: true
 		readOnly: !modeIsAdjustable.valid || modeIsAdjustable.value !== 1 || numberOfMultis > 1
-		width: 160
+		width: pumpButton.pumpEnabled ? 160 : 173
 		height: 45
 		color: acModeButtonMouseArea.containsPressed ? "#d3d3d3" : "#A8A8A8"
 		title: qsTr("AC MODE")
@@ -485,6 +496,8 @@ OverviewPage {
 		property int value: 0
 		property bool reset: false
 		property bool pumpEnabled: pumpRelay.value === 3
+
+		show: pumpEnabled
 		isCurrentItem: (buttonIndex == 2)
 		focus: root.active && isCurrentItem
 
@@ -588,25 +601,17 @@ OverviewPage {
 
 	function addService(service)
 	{
-		var name = service.name
-		if (service.type === DBusService.DBUS_SERVICE_TANK) {
-			tanksModel.append({serviceName: service.name})
-		}
 		if (service.type === DBusService.DBUS_SERVICE_MULTI) {
 			numberOfMultis++
 			if (vebusPrefix === "")
-				vebusPrefix = name;
+				vebusPrefix = service.name;
 		}
 	}
 
 	// Check available services to find tank sesnsors
-	function discoverTanks()
+	function discoverMulti()
 	{
-		tanksModel.clear()
 		for (var i = 0; i < DBusServices.count; i++) {
-			if (DBusServices.at(i).type === DBusService.DBUS_SERVICE_TANK) {
-				addService(DBusServices.at(i))
-			}
 			if (DBusServices.at(i).type === DBusService.DBUS_SERVICE_MULTI) {
 				addService(DBusServices.at(i))
 			}

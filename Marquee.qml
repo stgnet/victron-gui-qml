@@ -11,7 +11,14 @@ Rectangle {
 	property alias interval: marqueeTimer.interval
 	property alias fontSize: _text.font.pixelSize
 	property alias textColor: _text.color
-	property alias scroll: marqueeTimer.running
+	property alias textHorizontalAlignment: _text.horizontalAlignment
+	property bool scroll: true
+
+	function doScroll()
+	{
+		if (_text.paintedWidth > marquee.width)
+			marqueeTimer.running = true
+	}
 
 	Text {
 		id: _text
@@ -26,14 +33,19 @@ Rectangle {
 		id: marqueeTimer
 		interval: 100
 		repeat: true
-		running: _text.paintedWidth > marquee.width
+		running: _text.paintedWidth > marquee.width && scroll
 		onTriggered: moveText()
 		onRunningChanged: if (!running) _text.x = 0
 	}
 
-	function moveText() {
+	function moveText()
+	{
 		if (_text.x + _text.paintedWidth < 0)
 			_text.x = marquee.width
-		_text.x -= 2;
+
+		_text.x -= (!scroll && _text.x === 1 ? 1 : 2);
+
+		if (!scroll && _text.x === 0)
+			marqueeTimer.running = false
 	}
 }
